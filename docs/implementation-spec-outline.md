@@ -36,7 +36,9 @@ The full implementation spec should explicitly cite the relevant reference docum
 
 ## Primary Implementation Direction
 
-The system should be implemented as a repository-local skill suite under a top-level `skills/` directory, with Python scripts bundled inside the skills and shared support code available to those skills.
+The system should be implemented as a skill suite under a top-level `skills/` directory, with Python scripts bundled inside the skills and shared support code available to those skills.
+
+The skill package and the user's note-taking workspace are separate filesystem roots. The agent's working directory is assumed to be the root of the user's note-taking workspace, while the skill package may be installed or made available from outside that workspace.
 
 The implementation should follow this principle:
 
@@ -171,7 +173,7 @@ These rules should be treated as direct applications of the bundled reference ma
 
 ## Workspace State Model
 
-The repository should maintain three core categories of durable state:
+The user workspace should maintain three core categories of durable state:
 
 1. immutable evidence,
 2. derived knowledge surfaces,
