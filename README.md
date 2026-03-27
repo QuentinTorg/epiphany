@@ -5,6 +5,7 @@ This repository contains planning and specification work for an agent-assisted n
 Primary document:
 
 - [docs/product-spec.md](docs/product-spec.md)
+- [docs/implementation-spec.md](docs/implementation-spec.md)
 - [docs/implementation-spec-outline.md](docs/implementation-spec-outline.md)
 
 Background notes:
