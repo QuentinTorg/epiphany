@@ -4,8 +4,9 @@ This repository contains planning and specification work for an agent-assisted n
 
 Primary document:
 
-- [docs/product-spec.md](/home/qt/dev/ai_notes_2/docs/product-spec.md)
+- [docs/product-spec.md](docs/product-spec.md)
+- [docs/implementation-spec-outline.md](docs/implementation-spec-outline.md)
 
 Background notes:
 
-- [project_goals_freeform.md](/home/qt/dev/ai_notes_2/project_goals_freeform.md)
+- [project_goals_freeform.md](project_goals_freeform.md)

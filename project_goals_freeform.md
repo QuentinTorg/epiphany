@@ -61,3 +61,16 @@ Next, I think it's also important that after every turn, the agent properly bubb
 
 track which thread information came from with some sort of tag that can be qeuried later
 
+
+what is the imposed file structure for making sure notes are organized?
+document where rolling thread summary should be kept. independent document or at the top of the thread document?
+all file thread files are intended to be organized by date, meaning file path should be a YYYY-MM-DD-<name> format for file name
+define task storage format
+will there ever be a deeper bubbling of a thread such as during the ending of the thread, where a more vetted search of all topics is performed to make sure the thread has been properly distilled out to the other topics?
+Do we require any sort of frontmatter in the topic files to allow agents to quickly understand what they are about without fully scanning them?
+How do we trigger the reconcilliation skill?
+how does the distillation skill get triggered when it needs to finish resuming an open thread? how does it know if threads have never been distilled? Is there some sort of flag, frontmatter, or metadata in threads that have been updated but not distilled/closed?
+CAn we specify the file format (both file type and internal content layout/format) for all of the different document types we expect the agent to work with? Which content is required for each document type? What is the expected file extension? I'm guessing markdown, but how do we make sure the information is in a reliable format?
+do the skill specs document how scripts can be shared across multiple skills? do we need a symlink or something? This is less portable than I want it to be, but could be a stopgap
+Should we have a better explanation of what "entities" are? Its clear to me what topcis and time would be, but I'm not sure what an entity would be.
+please specify that the implementation spec should provide enough detail that I will be able to understand the intent of the contents of every file it plans to create, as well as any additional details you previously planned to include. I don't want to question what will be implemented in there later. I don't however, expect to have full file contents documented in the implementatino plan unless there is no other good way to document it, or if the file is going to be very small. I'm sure there will be exceptions to this.
