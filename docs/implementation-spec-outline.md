@@ -46,6 +46,8 @@ The implementation should follow this principle:
 - Python scripts enforce invariants and perform stateful operations,
 - repository files remain the durable source of truth.
 
+The full implementation spec should make explicit that agents perform semantic work while scripts perform structural work. Scripts should not be described as if they independently do summarization, semantic retrieval, or semantic distillation.
+
 This means the product is implemented as skills with supporting scripts, not as a standalone application that skills merely call into from the outside.
 
 The implementation should follow the referenced skill-authoring guidance closely, especially around concise `SKILL.md` files, workflow-oriented skill boundaries, and deterministic bundled scripts.
@@ -71,6 +73,12 @@ Responsibilities:
 
 This skill should handle ordinary note capture as well as lightweight structured capture that emerges during note-taking. It should not own the final deep reconciliation pass for a thread.
 
+The full implementation spec should also define:
+
+- how the agent chooses between an existing open thread and a new thread,
+- how stale open threads are handled,
+- whether and how closed threads may be reopened.
+
 ### `querying-notes`
 
 This skill owns retrieval and reasoning over the workspace.
@@ -86,6 +94,8 @@ Responsibilities:
 
 This skill should include action-state queries rather than splitting off separate task-only query skills in v1.
 
+The full implementation spec should define an explicit progressive-disclosure retrieval workflow, including how generated views and indexes are used to narrow the search before reading topic files or source evidence.
+
 ### `distilling-threads`
 
 This skill owns deep propagation, reconciliation, and recovery workflows.
@@ -96,9 +106,12 @@ Responsibilities:
 - complete deeper distillation from thread state into topics, tasks, and open questions,
 - rebuild or refresh derived workspace views when needed,
 - detect and resume incomplete distillation after interrupted sessions,
-- reconcile pending thread-level state with broader workspace state.
+- reconcile pending thread-level state with broader workspace state,
+- when explicitly closing a thread in a Git-backed workspace, prompt the user that this is a good time to commit and show the proposed `git commit` command before asking for confirmation.
 
 This skill should absorb what might otherwise be called `close-thread` or `update-summary` skills. Those are workflow branches inside distillation, not separate user-facing skills.
+
+The full implementation spec should also define that deep distillation may run without closing a thread, and that unresolved contradictions may leave the thread open pending further user clarification.
 
 ### `ingesting-documents`
 
@@ -113,6 +126,12 @@ Responsibilities:
 - hand off deeper propagation to the same distillation path used for ordinary threads.
 
 This should be a distinct skill rather than a branch inside `capturing-notes` because the workflow shape is materially different from live conversational capture. It is frequent enough and specialized enough to justify its own concise instructions.
+
+The full implementation spec should define:
+
+- how large documents are converted into a normalized text representation for agent use,
+- when full distillation should run immediately after ingestion,
+- how document summaries stay navigational rather than exhaustive.
 
 ## Why These Skills And Not More
 
@@ -240,6 +259,8 @@ This separation is important because the product requires both live assistant us
 
 The full implementation spec must explicitly answer whether deep distillation performs a broader and more vetted scan of relevant topics and action state than the lightweight per-turn bubbling path. If so, it must define when that broader scan runs and what it is expected to cover.
 
+The full implementation spec must also define the Git-aware close-thread behavior: it should specify that if the current workspace root is a Git repository, a successful close-thread flow prompts the user that now is a good time to commit, offers to make the commit, and shows the exact command that would be run. It should also specify that this behavior is skipped when the workspace is not a Git repository.
+
 ## Retrieval Architecture
 
 The implementation spec should preserve the product-level retrieval model:
@@ -291,6 +312,8 @@ Important design points:
 
 The full implementation spec must also decide whether topic files use frontmatter or another metadata block, what required metadata fields exist, and how an agent can quickly understand a topic's scope without fully scanning arbitrary prose.
 
+The full implementation spec should also define how the initial topic taxonomy can evolve, including how `other/` is used, when new custom top-level types may be proposed, and how user approval is required before adding them.
+
 ## Navigation Surfaces
 
 The product requires a workspace-level entrypoint. The implementation spec should define the major navigation surfaces needed for both humans and agents.
@@ -316,6 +339,8 @@ The implementation spec should define:
 - how the assistant is guided to resume distillation safely,
 - how recovery avoids duplicating updates or losing citations,
 - how the system distinguishes stale derived state from lost evidence.
+
+The full implementation spec should also define stale-open thread handling and concurrency protection so two agent sessions do not mutate the same thread or generated views at the same time.
 
 This area should receive the same design attention as normal happy-path capture.
 
