@@ -15,6 +15,7 @@ def _create_thread(tmp_path: Path) -> Path:
         thread_slug="robot-debugging",
         thread_title="Robot Debugging",
         stdin_body="Billy investigated the connectivity issue.",
+        timestamp="2026-03-27T09:00:00Z",
         create_if_missing=True,
         workspace_root=str(tmp_path),
     )

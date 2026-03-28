@@ -16,6 +16,7 @@ def test_capture_note_creates_thread_and_updates_views(tmp_path: Path) -> None:
         thread_slug="robot-debugging",
         thread_title="Robot Debugging",
         stdin_body="Billy investigated the connectivity issue.",
+        timestamp="2026-03-27T09:00:00Z",
         create_if_missing=True,
         workspace_root=str(tmp_path),
     )
@@ -41,6 +42,7 @@ def test_sync_thread_state_refreshes_summary_and_status_after_direct_edit(tmp_pa
         thread_slug="robot-debugging",
         thread_title="Robot Debugging",
         stdin_body="Billy investigated the connectivity issue.",
+        timestamp="2026-03-27T09:00:00Z",
         create_if_missing=True,
         workspace_root=str(tmp_path),
     )
@@ -75,6 +77,7 @@ def test_direct_thread_edit_plus_sync_refreshes_metadata_and_views(tmp_path: Pat
         thread_slug="robot-debugging",
         thread_title="Robot Debugging",
         stdin_body="Billy investigated the connectivity issue.",
+        timestamp="2026-03-27T09:00:00Z",
         create_if_missing=True,
         workspace_root=str(tmp_path),
     )

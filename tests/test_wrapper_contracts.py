@@ -267,3 +267,65 @@ def test_query_memory_wrapper_returns_candidates_and_pending_warnings(tmp_path: 
     assert payload["result"]["candidates"]
     assert payload["warnings"]
     assert any(candidate["path"].endswith("robot-debugging.md") for candidate in payload["result"]["candidates"])
+
+
+def test_apply_distillation_result_wrapper_rejects_invalid_update_json(tmp_path: Path) -> None:
+    """Intent: distillation wrapper should reject malformed deep-distillation payloads with a structured error."""
+    _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
+    _run(
+        [
+            "skills/capturing-notes/scripts/capture_note.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--thread-slug",
+            "robot-debugging",
+            "--thread-title",
+            "Robot Debugging",
+            "--create-if-missing",
+            "--stdin-body",
+            "Billy investigated the connectivity issue.",
+        ]
+    )
+
+    completed = _run(
+        [
+            "skills/distilling-threads/scripts/apply_distillation_result.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--thread-slug",
+            "robot-debugging",
+            "--update-json",
+            "{not-json}",
+        ]
+    )
+
+    assert completed.returncode == 2
+    payload = _parse_json_stdout(completed)
+    assert payload["ok"] is False
+    assert payload["error"]["code"] == "invalid_distillation_update_json"
+
+
+def test_ingest_document_wrapper_creates_import_artifacts(tmp_path: Path) -> None:
+    """Intent: ingest-document wrapper should create the source copy, normalized text, and import record via the common envelope."""
+    _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
+    source = tmp_path / "requirements.txt"
+    source.write_text("System requirements\n\nCAN bus retest is required.\n", encoding="utf-8")
+
+    completed = _run(
+        [
+            "skills/ingesting-documents/scripts/ingest_document.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--source-path",
+            str(source),
+            "--title",
+            "Robot Requirements",
+        ]
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = _parse_json_stdout(completed)
+    assert payload["ok"] is True
+    assert payload["result"]["import_record_path"].endswith("robot-requirements.md")
+    assert (tmp_path / payload["result"]["import_record_path"]).exists()
+    assert (tmp_path / payload["result"]["normalized_text_path"]).exists()

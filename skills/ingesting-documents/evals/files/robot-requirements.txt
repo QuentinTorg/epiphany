@@ -1,0 +1,4 @@
+Robot Requirements
+
+The Rover 3 platform must complete a CAN bus retest before release.
+Vendor signoff is required before shipment.

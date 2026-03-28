@@ -1,0 +1,8 @@
+[
+  { "query": "What did Billy work on last week?", "should_trigger": true },
+  { "query": "Show me the open blockers for Rover 3.", "should_trigger": true },
+  { "query": "Did we decide on 12V or 24V?", "should_trigger": true },
+  { "query": "Add this rough note to the weekly status thread.", "should_trigger": false },
+  { "query": "Import this requirements doc into the repo.", "should_trigger": false },
+  { "query": "Close the robot debugging thread and make sure it’s reconciled.", "should_trigger": false }
+]

@@ -1,0 +1,8 @@
+[
+  { "query": "Please add this rough scratch to my current robot debugging notes thread.", "should_trigger": true },
+  { "query": "I need to append some meeting notes to the open thread about Acme.", "should_trigger": true },
+  { "query": "Can you continue the active note-taking session and log this update?", "should_trigger": true },
+  { "query": "What tasks are still open for Billy?", "should_trigger": false },
+  { "query": "Please reconcile my pending threads and close the finished one.", "should_trigger": false },
+  { "query": "Import this PDF into the workspace and summarize what it contains.", "should_trigger": false }
+]

@@ -1,0 +1,8 @@
+[
+  { "query": "Pull this transcript into the workspace and turn it into a normalized source file.", "should_trigger": true },
+  { "query": "Add this markdown doc as imported evidence and give me a navigational summary.", "should_trigger": true },
+  { "query": "Store this external doc in the notes repo so we can cite it later.", "should_trigger": true },
+  { "query": "What tasks are still open from the imported doc?", "should_trigger": false },
+  { "query": "Continue the active note-taking session with this update.", "should_trigger": false },
+  { "query": "Deeply reconcile the import into topics and clear pending state.", "should_trigger": false }
+]

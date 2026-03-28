@@ -1,0 +1,8 @@
+[
+  { "query": "Finish reconciling the open thread into the durable memory files.", "should_trigger": true },
+  { "query": "Please resume the interrupted deep distillation run.", "should_trigger": true },
+  { "query": "Distill this import into topics and mark it complete if the reconciliation is done.", "should_trigger": true },
+  { "query": "Keep taking notes in the Rover 3 thread.", "should_trigger": false },
+  { "query": "What open questions are still unresolved?", "should_trigger": false },
+  { "query": "Bring this PDF into the repo and make it searchable.", "should_trigger": false }
+]

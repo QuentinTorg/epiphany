@@ -8,6 +8,7 @@ Primary document:
 - [docs/implementation-spec.md](docs/implementation-spec.md)
 - [docs/implementation-spec-outline.md](docs/implementation-spec-outline.md)
 - [docs/implementation-roadmap.md](docs/implementation-roadmap.md)
+- [docs/validation-audit.md](docs/validation-audit.md)
 
 Background notes:
 
@@ -35,6 +36,9 @@ Current test coverage is focused on the first implementation slice:
 - workspace bootstrap and generated seed files,
 - Git ignore handling for runtime state,
 - thread creation during note capture,
-- thread-local summary and status updates.
+- thread-local summary and status updates,
 - wrapper JSON-envelope behavior and actionable error handling,
-- canonical action-item creation and filtering.
+- canonical action-item creation and filtering,
+- coarse retrieval and pending-distillation warnings,
+- deep-distillation apply/finalize behavior for threads and topics,
+- document ingestion, normalized text generation, and import-record sync.

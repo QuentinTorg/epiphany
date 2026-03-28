@@ -1,0 +1,8 @@
+[
+  { "query": "Drop this rough note into whichever active thread it belongs to.", "should_trigger": true },
+  { "query": "Keep taking notes in the Rover 3 session and add this update.", "should_trigger": true },
+  { "query": "I want to store this scratch in my notes workspace without losing the raw text.", "should_trigger": true },
+  { "query": "What did Julian work on last week?", "should_trigger": false },
+  { "query": "Finish deep distillation for the robot thread and close it.", "should_trigger": false },
+  { "query": "Bring this design doc into the repo as an imported source.", "should_trigger": false }
+]

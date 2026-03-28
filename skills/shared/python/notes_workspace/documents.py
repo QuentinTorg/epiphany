@@ -27,6 +27,32 @@ ACTION_ITEM_BODY_RE = re.compile(
     re.DOTALL,
 )
 
+TOPIC_BODY_RE = re.compile(
+    r"^# (?P<title>.+?)\n\n<!-- BEGIN AUTO -->\n"
+    r"## Summary\n(?P<summary>.*?)\n\n"
+    r"## Current Understanding\n(?P<current_understanding>.*?)\n\n"
+    r"## Key Facts\n(?P<key_facts>.*?)\n\n"
+    r"## Related Topics\n(?P<related_topics>.*?)\n\n"
+    r"## Recent Evidence\n(?P<recent_evidence>.*?)\n\n"
+    r"## Change History\n(?P<change_history>.*?)\n<!-- END AUTO -->"
+    r"(?:\n\n## Manual Notes\n(?P<manual_notes>.*?))?\n?$",
+    re.DOTALL,
+)
+
+IMPORT_RECORD_BODY_RE = re.compile(
+    r"^# (?P<title>.+?)\n\n<!-- BEGIN AUTO -->\n"
+    r"## Source Summary\n(?P<source_summary>.*?)\n\n"
+    r"## Open Questions\n(?P<open_questions>.*?)\n\n"
+    r"## Candidate Action Items\n(?P<candidate_action_items>.*?)\n\n"
+    r"## Distillation Notes\n(?P<distillation_notes>.*?)\n<!-- END AUTO -->\n?$",
+    re.DOTALL,
+)
+
+IMPORT_TEXT_BODY_RE = re.compile(
+    r"^# (?P<title>.+?)\n\n<!-- BEGIN AUTO -->\n(?P<chunks>.*?)\n<!-- END AUTO -->\n?$",
+    re.DOTALL,
+)
+
 
 def placeholder(text: str) -> str:
     return text
@@ -144,3 +170,101 @@ def parse_action_item_body(body: str) -> dict[str, str]:
     parsed = {key: (value or "").rstrip() for key, value in match.groupdict().items()}
     parsed.setdefault("manual_notes", "")
     return parsed
+
+
+def render_topic_body(
+    *,
+    title: str,
+    summary: str,
+    current_understanding: str,
+    key_facts: str,
+    related_topics: str,
+    recent_evidence: str,
+    change_history: str,
+    manual_notes: str = "",
+) -> str:
+    body = (
+        f"# {title}\n\n"
+        "<!-- BEGIN AUTO -->\n"
+        "## Summary\n"
+        f"{summary.strip()}\n\n"
+        "## Current Understanding\n"
+        f"{current_understanding.strip()}\n\n"
+        "## Key Facts\n"
+        f"{key_facts.strip()}\n\n"
+        "## Related Topics\n"
+        f"{related_topics.strip()}\n\n"
+        "## Recent Evidence\n"
+        f"{recent_evidence.strip()}\n\n"
+        "## Change History\n"
+        f"{change_history.strip()}\n"
+        "<!-- END AUTO -->"
+    )
+    body += f"\n\n## Manual Notes\n{manual_notes.strip()}\n"
+    return body
+
+
+def parse_topic_body(body: str) -> dict[str, str]:
+    match = TOPIC_BODY_RE.match(body.strip() + "\n")
+    if not match:
+        raise WorkspaceError(
+            "invalid_topic_document",
+            "Topic document body does not match the required structure.",
+            "Rebuild the topic document using the workspace tooling.",
+        )
+    parsed = {key: (value or "").rstrip() for key, value in match.groupdict().items()}
+    parsed.setdefault("manual_notes", "")
+    return parsed
+
+
+def render_import_record_body(
+    *,
+    title: str,
+    source_summary: str,
+    open_questions: str,
+    candidate_action_items: str,
+    distillation_notes: str,
+) -> str:
+    return (
+        f"# {title}\n\n"
+        "<!-- BEGIN AUTO -->\n"
+        "## Source Summary\n"
+        f"{source_summary.strip()}\n\n"
+        "## Open Questions\n"
+        f"{open_questions.strip()}\n\n"
+        "## Candidate Action Items\n"
+        f"{candidate_action_items.strip()}\n\n"
+        "## Distillation Notes\n"
+        f"{distillation_notes.strip()}\n"
+        "<!-- END AUTO -->\n"
+    )
+
+
+def parse_import_record_body(body: str) -> dict[str, str]:
+    match = IMPORT_RECORD_BODY_RE.match(body.strip() + "\n")
+    if not match:
+        raise WorkspaceError(
+            "invalid_import_record_document",
+            "Import record body does not match the required structure.",
+            "Rebuild the import record using the workspace tooling.",
+        )
+    return {key: value.rstrip() for key, value in match.groupdict().items()}
+
+
+def render_import_text_body(*, title: str, chunks: list[tuple[str, str]]) -> str:
+    lines = [f"# {title}", "", "<!-- BEGIN AUTO -->"]
+    for index, (label, content) in enumerate(chunks, start=1):
+        lines.extend([f"### txt-{index:04d} | {label}", content.strip(), ""])
+    lines.append("<!-- END AUTO -->")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def parse_import_text_body(body: str) -> dict[str, str]:
+    match = IMPORT_TEXT_BODY_RE.match(body.strip() + "\n")
+    if not match:
+        raise WorkspaceError(
+            "invalid_import_text_document",
+            "Normalized import text body does not match the required structure.",
+            "Rebuild the normalized import text using the workspace tooling.",
+        )
+    return {key: value.rstrip() for key, value in match.groupdict().items()}

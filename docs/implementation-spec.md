@@ -463,6 +463,7 @@ Whenever an agent edits derived natural-language sections directly, it must stil
 - generated view rebuilds when the edited document affects navigation or operational state.
 
 For thread-local direct edits, the required structural follow-up tool is `sync_thread_state.py`.
+For import-record direct edits, the required structural follow-up tool is `sync_import_state.py`.
 
 Clarification:
 
@@ -477,6 +478,13 @@ Clarification:
 - it does not create or revise topic summaries, import summaries, decision summaries, or any other prose outside the already edited thread itself,
 - it may rebuild `memory/views/open-threads.md`, `memory/views/pending-distillation.md`, and `memory/README.md`,
 - it rebuilds `memory/views/action-items.md` only when explicit canonical action-item upserts were provided.
+
+Clarification for imports:
+
+- `sync_import_state.py` does not perform semantic summarization or semantic topic reconciliation,
+- it only refreshes import-record metadata and generated views based on the already-edited import record and any explicitly provided canonical action-item payload,
+- the automatic follow-up is limited to mechanical rollups such as refreshing `preview`, `updated_at`, `light_distilled_at`, pending-state metadata, `memory/views/pending-distillation.md`, `memory/views/imports.md`, and `memory/README.md`,
+- it does not create or revise topic summaries or other prose outside the already edited import record itself.
 
 ## Script Command Surface
 
@@ -589,7 +597,7 @@ Unless explicitly overridden, all wrappers must treat the current working direct
 
 ### `distilling-threads/scripts/`
 
-- `distill_thread.py`
+- `apply_distillation_result.py`
   - Purpose: apply agent-authored deep-distillation results to one thread or import record, update state markers, optionally close the thread, and rebuild affected views.
   - It must not independently decide the semantic contents of topic updates, action-item updates, or source summaries.
   - Required arguments:
@@ -625,13 +633,22 @@ Unless explicitly overridden, all wrappers must treat the current working direct
 
   If `--imported-at` is omitted, the script must apply the current system timestamp itself.
 
-- `apply_import_update.py`
-  - Purpose: optional convenience wrapper that applies agent-authored summary, topic, and action-item updates to an import record while preserving metadata and structure.
-  - It must not independently generate, merge, or reinterpret the semantic content it writes.
+- `sync_import_state.py`
+  - Purpose: refresh import-record metadata and generated views after direct agent edits to import-record derived prose sections.
+  - Automatic scope:
+    - recompute import preview from the edited `## Source Summary`,
+    - stamp import-record update timestamps and pending-state metadata,
+    - rebuild the imports, pending-distillation, and workspace-entrypoint views,
+    - optionally upsert canonical action items and rebuild the action-items view when the agent explicitly passes structured action-item payload.
+  - Non-goals:
+    - semantic summarization,
+    - semantic merging of import-record prose,
+    - topic reconciliation,
+    - deep distillation into topics or other derived documents.
   - Required arguments:
     - `--import-record-path`
-    - `--update-json`
   - Optional arguments:
+    - `--canonical-action-items-json`
     - `--dry-run`
     - `--workspace-root`
 
@@ -662,21 +679,9 @@ All wrapper scripts must also:
 
 ### Optional update-wrapper payload contracts
 
-If import update wrappers are implemented, the minimum required `--update-json` contracts are:
+The minimum required `--update-json` contract for deep-distillation apply is:
 
-- `apply_import_update.py`
-  - must accept:
-    - `source_summary_markdown`
-    - `open_questions_markdown`
-    - `candidate_action_items_markdown`
-    - `distillation_notes_markdown`
-    - `primary_topic_refs`
-    - `primary_entity_refs`
-  - may also accept:
-    - `action_item_refs`
-    - `pending_reason`
-
-- `distill_thread.py`
+- `apply_distillation_result.py`
   - must accept:
     - `source_patch`
     - `topic_upserts`
@@ -910,6 +915,7 @@ source_path: ../files/YYYY/YYYY-MM-DD-<slug>.<ext>
 normalized_text_path: ../text/YYYY/YYYY-MM-DD-<slug>.md
 source_format: <ext>
 imported_at: <timestamp>
+updated_at: <timestamp>
 distillation_state: pending | complete
 light_distilled_at: <timestamp or null>
 deep_distilled_at: <timestamp or null>

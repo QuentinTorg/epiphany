@@ -1,0 +1,8 @@
+[
+  { "query": "Import this design doc into the notes workspace and make it searchable.", "should_trigger": true },
+  { "query": "Bring this PDF into the repo as an evidence source.", "should_trigger": true },
+  { "query": "I want to add this requirements file as supporting documentation for my notes.", "should_trigger": true },
+  { "query": "Add this rough note to the open thread.", "should_trigger": false },
+  { "query": "What did Rover 3 require before release?", "should_trigger": false },
+  { "query": "Finish reconciling the pending thread and close it.", "should_trigger": false }
+]

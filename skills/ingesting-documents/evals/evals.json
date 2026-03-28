@@ -1,0 +1,31 @@
+{
+  "skill_name": "ingesting-documents",
+  "evals": [
+    {
+      "id": "ingest-text-source",
+      "prompt": "Import the attached robot requirements text file into the workspace and make it ready for later reconciliation.",
+      "expected_output": "The original file is preserved, normalized text is created with stable chunk anchors, an import record is created, and the agent edits the import record directly before running sync_import_state.py.",
+      "files": [
+        "evals/files/robot-requirements.txt"
+      ],
+      "assertions": [
+        "The source file is copied into memory/imports/files",
+        "A normalized text file is created under memory/imports/text",
+        "An import record is created under memory/imports/records",
+        "The agent uses direct import-record edits plus sync_import_state.py"
+      ]
+    },
+    {
+      "id": "ingest-then-distill",
+      "prompt": "Bring this requirements file into the workspace and fully reconcile it into canonical topics if possible.",
+      "expected_output": "The document is ingested first, then the workflow continues into deep distillation using apply_distillation_result.py.",
+      "files": [
+        "evals/files/robot-requirements.txt"
+      ],
+      "assertions": [
+        "The workflow reads normalized text rather than relying on the original binary",
+        "Deep distillation happens after ingestion rather than replacing it"
+      ]
+    }
+  ]
+}

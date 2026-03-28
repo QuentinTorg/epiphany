@@ -163,7 +163,7 @@ Goal:
 
 Scope:
 
-- `skills/distilling-threads/scripts/distill_thread.py`
+- `skills/distilling-threads/scripts/apply_distillation_result.py`
 - `skills/distilling-threads/scripts/resume_pending.py`
 - topic upsert application logic for agent-authored distillation results
 - change-history and freshness updates
@@ -204,7 +204,7 @@ Goal:
 Scope:
 
 - `skills/ingesting-documents/scripts/ingest_document.py`
-- `skills/ingesting-documents/scripts/apply_import_update.py`
+- `skills/ingesting-documents/scripts/sync_import_state.py`
 - import file copy/register behavior
 - normalized text generation for v1 formats
 - import record creation
@@ -229,7 +229,7 @@ Review gate:
 Implementation note:
 
 - the agent owns the source summary, candidate-topic interpretation, and candidate action-item interpretation,
-- the scripts in this milestone only stage files, create normalized text, apply already-authored import-record updates, and trigger the structural follow-up path.
+- the scripts in this milestone only stage files, create normalized text, and perform structural follow-up after already-authored import-record updates.
 
 ## Milestone 7: Recovery And Concurrency Hardening
 

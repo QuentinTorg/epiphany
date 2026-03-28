@@ -110,3 +110,4 @@ should we add some sort of description/title to the frontmatter so the agents ca
 
 # Future TODO:
 add python tooling for frontmatter query. Make sure all skills know when to use it
+add integration testing pipeline. maybe this is the eval?

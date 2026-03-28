@@ -7,6 +7,7 @@ from pathlib import Path
 from .documents import parse_thread_body, preview_from_text, render_generated_doc
 from .frontmatter import load_markdown, write_markdown
 from .action_items import list_action_items
+from .topics import custom_type_dir_name, list_topics
 from .paths import (
     TOPIC_TYPES,
     action_items_root,
@@ -105,6 +106,14 @@ def rebuild_pending_distillation_view(workspace_root: Path) -> list[str]:
         pending_lines.append(
             f"- `thread` `{frontmatter['title']}` ({relpath(path, workspace_root)}) | state `{thread_state}` | reasons `{reasons}` | last attempted `{frontmatter.get('last_deep_distill_attempt_at')}`"
         )
+    for path in sorted((imports_root(workspace_root) / "records").glob("*/*.md")):
+        frontmatter, _ = load_markdown(path)
+        if frontmatter.get("distillation_state") != "pending":
+            continue
+        reasons = ", ".join(frontmatter.get("pending_reason", [])) or "pending"
+        pending_lines.append(
+            f"- `import` `{frontmatter['title']}` ({relpath(path, workspace_root)}) | state `pending` | reasons `{reasons}` | last attempted `{frontmatter.get('last_deep_distill_attempt_at')}`"
+        )
     body = render_generated_doc(
         title="Pending Distillation",
         sections=[
@@ -132,10 +141,12 @@ def rebuild_pending_distillation_view(workspace_root: Path) -> list[str]:
 def rebuild_static_views(workspace_root: Path) -> list[str]:
     workspace_root = resolve_workspace_root(str(workspace_root))
     updated: list[str] = []
+    topics = list_topics(workspace_root=str(workspace_root))
 
     action_item_result = list_action_items(workspace_root=str(workspace_root), include_closed=False)
     task_lines: list[str] = []
     question_lines: list[str] = []
+    import_lines: list[str] = []
     for item in action_item_result["items"]:
         line = (
             f"- `{item['title']}` ({item['path']}) | status `{item['status']}` | "
@@ -152,12 +163,36 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
         else:
             question_lines.append(line)
 
+    for path in sorted((imports_root(workspace_root) / "records").glob("*/*.md")):
+        frontmatter, _ = load_markdown(path)
+        import_lines.append(
+            f"- `{frontmatter['title']}` ({relpath(path, workspace_root)}) | format `{frontmatter['source_format']}` | "
+            f"imported `{frontmatter['imported_at']}` | distillation `{frontmatter['distillation_state']}`"
+        )
+
+    topic_type_lines: list[str] = []
+    typed_topics: dict[str, list[dict[str, object]]] = {topic_type: [] for topic_type in TOPIC_TYPES}
+    custom_groups: dict[str, list[dict[str, object]]] = {}
+    for item in topics:
+        if item["type"] == "custom":
+            custom_name = str(item["custom_type"] or "uncategorized")
+            custom_groups.setdefault(custom_name, []).append(item)
+        else:
+            typed_topics[str(item["type"])].append(item)
+
+    for topic_type in TOPIC_TYPES:
+        if topic_type == "custom":
+            count = sum(len(items) for items in custom_groups.values())
+            topic_type_lines.append(f"- `custom` ({count})")
+        else:
+            topic_type_lines.append(f"- `{topic_type}` ({len(typed_topics[topic_type])})")
+
     static_views = {
         view_root(workspace_root) / "imports.md": (
             "Imports",
             "imports",
             "Lists imported source records and their distillation state.",
-            [("## Imports", "No imported sources yet.")],
+            [("## Imports", "\n".join(import_lines) if import_lines else "No imported sources yet.")],
         ),
         view_root(workspace_root) / "action-items.md": (
             "Action Items",
@@ -172,7 +207,7 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
             "Topics Index",
             "topics-index",
             "Links to typed topic indexes and recently updated topics.",
-            [("## Topic Types", "\n".join(f"- `{topic_type}`" for topic_type in TOPIC_TYPES))],
+            [("## Topic Types", "\n".join(topic_type_lines))],
         ),
     }
 
@@ -191,6 +226,12 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
         if topic_type == "custom":
             continue
         path = topics_root(workspace_root) / topic_type / "index.md"
+        lines = []
+        for item in typed_topics[topic_type]:
+            lines.append(
+                f"- `{item['title']}` ({item['path']}) | freshness `{item['freshness']}` | updated `{item['updated_at']}`\n"
+                f"  Preview: {item['preview']}"
+            )
         fm = {
             "doc_type": "generated-view",
             "view_type": f"topic-index-{topic_type}",
@@ -203,12 +244,15 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
             fm,
             render_generated_doc(
                 title=f"{topic_type.title()} Index",
-                sections=[("## Topics", f"No topics in `{topic_type}` yet.")],
+                sections=[("## Topics", "\n".join(lines) if lines else f"No topics in `{topic_type}` yet.")],
             ),
         )
         updated.append(relpath(path, workspace_root))
 
     custom_index = topics_root(workspace_root) / "custom" / "index.md"
+    custom_lines = []
+    for custom_type, items in sorted(custom_groups.items()):
+        custom_lines.append(f"- `{custom_type}` ({len(items)})")
     write_markdown(
         custom_index,
         {
@@ -218,9 +262,36 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
             "updated_at": current_timestamp(),
             "generated": True,
         },
-        render_generated_doc(title="Custom Topic Types", sections=[("## Custom Types", "No custom topic types yet.")]),
+        render_generated_doc(
+            title="Custom Topic Types",
+            sections=[("## Custom Types", "\n".join(custom_lines) if custom_lines else "No custom topic types yet.")],
+        ),
     )
     updated.append(relpath(custom_index, workspace_root))
+
+    for custom_type, items in sorted(custom_groups.items()):
+        custom_dir = topics_root(workspace_root) / "custom" / custom_type_dir_name(custom_type)
+        custom_type_lines = []
+        for item in items:
+            custom_type_lines.append(
+                f"- `{item['title']}` ({item['path']}) | freshness `{item['freshness']}` | updated `{item['updated_at']}`\n"
+                f"  Preview: {item['preview']}"
+            )
+        write_markdown(
+            custom_dir / "index.md",
+            {
+                "doc_type": "generated-view",
+                "view_type": f"topic-index-custom-{custom_type_dir_name(custom_type)}",
+                "preview": f"Lists topic files in custom type `{custom_type}`."[:240],
+                "updated_at": current_timestamp(),
+                "generated": True,
+            },
+            render_generated_doc(
+                title=f"{custom_type.title()} Index",
+                sections=[("## Topics", "\n".join(custom_type_lines) if custom_type_lines else "No topics yet.")],
+            ),
+        )
+        updated.append(relpath(custom_dir / "index.md", workspace_root))
 
     return updated
 

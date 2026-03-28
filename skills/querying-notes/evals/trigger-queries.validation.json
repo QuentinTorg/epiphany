@@ -1,0 +1,8 @@
+[
+  { "query": "Can you tell me what Acme still owes us and cite the notes?", "should_trigger": true },
+  { "query": "What is blocked right now for the robot project?", "should_trigger": true },
+  { "query": "Search the workspace and answer what changed about Rover 3 over time.", "should_trigger": true },
+  { "query": "Start a new thread for customer follow-up notes.", "should_trigger": false },
+  { "query": "Pull this PDF into the notes workspace and normalize it.", "should_trigger": false },
+  { "query": "Finish pending distillation items and close the thread if complete.", "should_trigger": false }
+]
