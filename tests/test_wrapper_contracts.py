@@ -95,8 +95,8 @@ def test_capture_wrapper_returns_actionable_error_for_missing_thread_title(tmp_p
     assert payload["error"]["hint"]
 
 
-def test_apply_thread_update_wrapper_returns_structured_error_for_invalid_json(tmp_path: Path) -> None:
-    """Intent: apply-thread-update wrapper should reject malformed update payloads with a structured error."""
+def test_sync_thread_state_wrapper_returns_structured_error_for_invalid_action_item_json(tmp_path: Path) -> None:
+    """Intent: sync-thread-state wrapper should reject malformed canonical action-item payloads with a structured error."""
     _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
     capture = _parse_json_stdout(
         _run(
@@ -118,12 +118,12 @@ def test_apply_thread_update_wrapper_returns_structured_error_for_invalid_json(t
 
     completed = _run(
         [
-            "skills/capturing-notes/scripts/apply_thread_update.py",
+            "skills/capturing-notes/scripts/sync_thread_state.py",
             "--workspace-root",
             str(tmp_path),
             "--thread-path",
             thread_path,
-            "--update-json",
+            "--canonical-action-items-json",
             "{not-json}",
         ]
     )
@@ -131,7 +131,7 @@ def test_apply_thread_update_wrapper_returns_structured_error_for_invalid_json(t
     assert completed.returncode == 2
     payload = _parse_json_stdout(completed)
     assert payload["ok"] is False
-    assert payload["error"]["code"] == "invalid_update_json"
+    assert payload["error"]["code"] == "invalid_canonical_action_items_json"
 
 
 def test_thread_status_wrapper_reports_current_thread_state(tmp_path: Path) -> None:
@@ -167,3 +167,48 @@ def test_thread_status_wrapper_reports_current_thread_state(tmp_path: Path) -> N
     assert payload["ok"] is True
     assert payload["result"]["thread_status"] == "open"
     assert payload["result"]["distillation_state"] == "pending"
+
+
+def test_sync_thread_state_wrapper_refreshes_preview_after_direct_edit(tmp_path: Path) -> None:
+    """Intent: sync-thread-state wrapper should support the direct-edit workflow by refreshing metadata and views."""
+    _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
+    capture = _parse_json_stdout(
+        _run(
+            [
+                "skills/capturing-notes/scripts/capture_note.py",
+                "--workspace-root",
+                str(tmp_path),
+                "--thread-slug",
+                "robot-debugging",
+                "--thread-title",
+                "Robot Debugging",
+                "--create-if-missing",
+                "--stdin-body",
+                "Billy investigated the connectivity issue.",
+            ]
+        )
+    )
+    thread_path = tmp_path / capture["result"]["thread_path"]
+    contents = thread_path.read_text(encoding="utf-8")
+    contents = contents.replace(
+        "Summary pending. [sources: ]",
+        "Billy investigated robot connectivity and needs to retest tomorrow. [sources: thr-2026-03-27-robot-debugging#snp-0001]",
+    )
+    thread_path.write_text(contents, encoding="utf-8")
+
+    completed = _run(
+        [
+            "skills/capturing-notes/scripts/sync_thread_state.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--thread-path",
+            str(thread_path),
+        ]
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = _parse_json_stdout(completed)
+    assert payload["ok"] is True
+    assert payload["result"]["thread_path"].endswith("robot-debugging.md")
+    refreshed = thread_path.read_text(encoding="utf-8")
+    assert 'preview: "Billy investigated robot connectivity and needs to retest tomorrow."' in refreshed

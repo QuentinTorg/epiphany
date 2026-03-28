@@ -71,7 +71,7 @@ Goal:
 Scope:
 
 - `skills/capturing-notes/scripts/capture_note.py`
-- `skills/capturing-notes/scripts/apply_thread_update.py`
+- `skills/capturing-notes/scripts/sync_thread_state.py`
 - `skills/capturing-notes/scripts/thread_status.py`
 - thread file creation and append behavior
 - snippet IDs and timestamps
@@ -81,8 +81,8 @@ Scope:
 Behavioral model:
 
 - Python appends raw snippets and updates structure,
-- the agent drafts summary/open-question/candidate-action changes,
-- Python applies those drafts without inventing content.
+- the agent edits thread-local summary/open-question/candidate-action prose directly,
+- Python performs the lightweight structural sync afterward without inventing content.
 
 Acceptance criteria:
 
@@ -165,7 +165,7 @@ Scope:
 
 - `skills/distilling-threads/scripts/distill_thread.py`
 - `skills/distilling-threads/scripts/resume_pending.py`
-- topic upsert logic
+- topic upsert application logic for agent-authored distillation results
 - change-history and freshness updates
 - pending state transitions
 - `memory/views/pending-distillation.md`
@@ -187,6 +187,11 @@ Review gate:
 - inspect a change-history entry,
 - inspect `pending-distillation.md`,
 - test one unresolved contradiction case.
+
+Implementation note:
+
+- the agent performs the semantic review, decides topic/action-item updates, and writes or prepares the natural-language changes,
+- the scripts in this milestone only apply those already-decided changes, update state markers, and rebuild generated views.
 
 ## Milestone 6: Document Ingestion
 
@@ -220,6 +225,11 @@ Review gate:
 - inspect one imported file, one normalized text file, and one import record,
 - test retrieval that cites imported evidence,
 - confirm the workflow does not require loading the full document into context.
+
+Implementation note:
+
+- the agent owns the source summary, candidate-topic interpretation, and candidate action-item interpretation,
+- the scripts in this milestone only stage files, create normalized text, apply already-authored import-record updates, and trigger the structural follow-up path.
 
 ## Milestone 7: Recovery And Concurrency Hardening
 
@@ -292,7 +302,7 @@ The first implementation batch should therefore produce:
 - shared Python package skeleton,
 - bootstrap script,
 - capture-note script,
-- apply-thread-update script,
+- sync-thread-state script,
 - thread-status script,
 - initial generated view rebuild for `open-threads.md`.
 

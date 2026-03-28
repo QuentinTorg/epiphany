@@ -17,6 +17,16 @@ THREAD_BODY_RE = re.compile(
     re.DOTALL,
 )
 
+ACTION_ITEM_BODY_RE = re.compile(
+    r"^# (?P<title>.+?)\n\n<!-- BEGIN AUTO -->\n"
+    r"## Summary\n(?P<summary>.*?)\n\n"
+    r"## Current State\n(?P<current_state>.*?)\n\n"
+    r"## Evidence\n(?P<evidence>.*?)\n\n"
+    r"## Resolution History\n(?P<resolution_history>.*?)\n<!-- END AUTO -->"
+    r"(?:\n\n## Manual Notes\n(?P<manual_notes>.*?))?\n?$",
+    re.DOTALL,
+)
+
 
 def placeholder(text: str) -> str:
     return text
@@ -94,3 +104,43 @@ def write_if_changed(path: Path, content: str) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     return True
+
+
+def render_action_item_body(
+    *,
+    title: str,
+    summary: str,
+    current_state: str,
+    evidence: str,
+    resolution_history: str,
+    manual_notes: str = "",
+) -> str:
+    body = (
+        f"# {title}\n\n"
+        "<!-- BEGIN AUTO -->\n"
+        "## Summary\n"
+        f"{summary.strip()}\n\n"
+        "## Current State\n"
+        f"{current_state.strip()}\n\n"
+        "## Evidence\n"
+        f"{evidence.strip()}\n\n"
+        "## Resolution History\n"
+        f"{resolution_history.strip()}\n"
+        "<!-- END AUTO -->"
+    )
+    if manual_notes or manual_notes == "":
+        body += f"\n\n## Manual Notes\n{manual_notes.strip()}\n"
+    return body
+
+
+def parse_action_item_body(body: str) -> dict[str, str]:
+    match = ACTION_ITEM_BODY_RE.match(body.strip() + "\n")
+    if not match:
+        raise WorkspaceError(
+            "invalid_action_item_document",
+            "Action-item document body does not match the required structure.",
+            "Rebuild the action-item document using the workspace tooling.",
+        )
+    parsed = {key: (value or "").rstrip() for key, value in match.groupdict().items()}
+    parsed.setdefault("manual_notes", "")
+    return parsed

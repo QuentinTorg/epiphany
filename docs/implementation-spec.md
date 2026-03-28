@@ -333,7 +333,7 @@ Responsibilities:
 - draft updates to the thread-local open-question list,
 - perform lightweight duplicate and contradiction checks,
 - draft lightweight action-item extraction,
-- apply those agent-authored updates through structural scripts,
+- write those derived updates directly into the thread document,
 - mark the thread as pending deep distillation after new content arrives.
 
 This skill may update canonical action items when the evidence is explicit and the topic linkage is confident. It must not perform full topic reconciliation.
@@ -364,7 +364,7 @@ Responsibilities:
 
 - run agent-led deep distillation for one or more threads/import records,
 - update or create topic and action-item drafts based on semantic review,
-- apply those updates through structural scripts,
+- write derived natural-language updates directly into the relevant documents or use optional update wrappers when that is more convenient,
 - refresh generated views,
 - mark thread/import state as deeply distilled,
 - resume incomplete prior attempts safely,
@@ -383,7 +383,7 @@ Responsibilities:
 - create the Markdown ingestion record,
 - draft a source summary oriented around what the document contains and where to look in it,
 - draft candidate topics and action items,
-- apply lightweight bubbling through structural scripts,
+- write derived import-record updates directly or use an optional update wrapper when that is more convenient,
 - mark the import as pending deep distillation,
 - by default, continue directly into full deep distillation unless the user explicitly asks for staged ingestion only.
 
@@ -435,9 +435,48 @@ The implementation must preserve this division of responsibility:
 - Agents decide which topics are affected and how current understanding changes.
 - Agents decide what contradictions exist and which open questions should be surfaced.
 - Agents decide how retrieved evidence answers a user's question.
-- Scripts create files, stamp timestamps, maintain frontmatter, preserve section structure, move files, apply agent-authored updates, and regenerate views.
+- Agents may directly edit derived natural-language sections such as summaries, open-question lists, candidate-action sections, topic summaries, and action-item prose.
+- Scripts create files, append raw evidence, stamp timestamps, maintain frontmatter, preserve section structure, move files, validate structural invariants, and regenerate views.
 
 No script should be specified as if it can independently perform the semantic interpretation that the agent is expected to do.
+
+### Editing model
+
+The default editing model is:
+
+- raw evidence capture goes through scripts,
+- frontmatter/state transitions go through scripts,
+- generated views go through scripts,
+- derived natural-language sections are edited directly by the agent.
+
+This applies to:
+
+- thread `## Current Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes`,
+- import-record `## Source Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes`,
+- topic auto-managed prose sections,
+- action-item `## Summary`, `## Current State`, `## Evidence`, and `## Resolution History`.
+
+Whenever an agent edits derived natural-language sections directly, it must still ensure that any required structural follow-up happens afterward, including:
+
+- frontmatter fields that depend on the semantic change,
+- canonical action-item upserts when explicit action state was introduced,
+- generated view rebuilds when the edited document affects navigation or operational state.
+
+For thread-local direct edits, the required structural follow-up tool is `sync_thread_state.py`.
+
+Clarification:
+
+- `sync_thread_state.py` does not perform semantic summarization or semantic topic reconciliation,
+- it only refreshes metadata and generated views based on the already-edited thread and any explicitly provided canonical action-item payload,
+- the automatic "bubble up" is limited to mechanical rollups that can be derived without semantic rewriting, including:
+  - refreshing thread frontmatter fields such as `preview`, `last_updated_at`, `light_distilled_at`, and pending-state metadata,
+  - updating `memory/views/open-threads.md` with the thread title, path, last updated time, distillation state, preview, and open-question count derived from the thread body,
+  - updating `memory/views/pending-distillation.md` with the thread path, thread state, and pending reasons,
+  - updating `memory/README.md` counts and navigation links,
+  - rebuilding `memory/views/action-items.md` only when the agent explicitly provided canonical action-item payload for structured upsert,
+- it does not create or revise topic summaries, import summaries, decision summaries, or any other prose outside the already edited thread itself,
+- it may rebuild `memory/views/open-threads.md`, `memory/views/pending-distillation.md`, and `memory/README.md`,
+- it rebuilds `memory/views/action-items.md` only when explicit canonical action-item upserts were provided.
 
 ## Script Command Surface
 
@@ -480,12 +519,22 @@ Unless explicitly overridden, all wrappers must treat the current working direct
   If `--timestamp` is omitted, the script must apply the current system timestamp itself.
   If `--create-if-missing` is used, `--thread-title` becomes required.
 
-- `apply_thread_update.py`
-  - Purpose: apply agent-authored updates to a thread document's summary, open questions, candidate action items, and link fields while preserving metadata and structure.
+- `sync_thread_state.py`
+  - Purpose: refresh thread metadata and generated views after direct agent edits to thread-local derived prose sections.
+  - Automatic scope:
+    - recompute thread preview from the edited `## Current Summary`,
+    - stamp thread-local timestamps and pending-state metadata,
+    - rebuild the open-threads, pending-distillation, and workspace-entrypoint views,
+    - optionally upsert canonical action items and rebuild the action-items view when the agent explicitly passes structured action-item payload.
+  - Non-goals:
+    - semantic summarization,
+    - semantic merging of thread prose,
+    - topic reconciliation,
+    - deep distillation into topics or other derived documents.
   - Required arguments:
     - `--thread-path`
-    - `--update-json`
   - Optional arguments:
+    - `--canonical-action-items-json`
     - `--dry-run`
     - `--workspace-root`
 
@@ -537,6 +586,7 @@ Unless explicitly overridden, all wrappers must treat the current working direct
 
 - `distill_thread.py`
   - Purpose: apply agent-authored deep-distillation results to one thread or import record, update state markers, optionally close the thread, and rebuild affected views.
+  - It must not independently decide the semantic contents of topic updates, action-item updates, or source summaries.
   - Required arguments:
     - one of `--thread-path`, `--thread-slug`, `--import-record-path`, or `--import-slug`
   - Optional arguments:
@@ -571,7 +621,8 @@ Unless explicitly overridden, all wrappers must treat the current working direct
   If `--imported-at` is omitted, the script must apply the current system timestamp itself.
 
 - `apply_import_update.py`
-  - Purpose: apply agent-authored summary, topic, and action-item updates to an import record while preserving metadata and structure.
+  - Purpose: optional convenience wrapper that applies agent-authored summary, topic, and action-item updates to an import record while preserving metadata and structure.
+  - It must not independently generate, merge, or reinterpret the semantic content it writes.
   - Required arguments:
     - `--import-record-path`
     - `--update-json`
@@ -604,21 +655,9 @@ All wrapper scripts must also:
 - reject ambiguous input with actionable errors instead of guessing,
 - support pagination or file output when result size may exceed normal tool-output limits.
 
-### Update payload contracts
+### Optional update-wrapper payload contracts
 
-The minimum required `--update-json` contracts are:
-
-- `apply_thread_update.py`
-  - must accept:
-    - `summary_markdown`
-    - `open_questions_markdown`
-    - `candidate_action_items_markdown`
-    - `distillation_notes_markdown`
-    - `primary_topic_refs`
-    - `primary_entity_refs`
-  - may also accept:
-    - `action_item_refs`
-    - `pending_reason`
+If import update wrappers are implemented, the minimum required `--update-json` contracts are:
 
 - `apply_import_update.py`
   - must accept:
@@ -766,7 +805,9 @@ Required body layout:
 Decisions:
 
 - The rolling thread summary is embedded in `## Current Summary` at the top of the thread file.
-- Thread files are canonical evidence files and must only be modified through scripts.
+- Thread files are canonical evidence files.
+- Raw snippets and thread frontmatter/state transitions must be modified through scripts.
+- Derived thread-local prose sections are edited directly by the agent.
 - Per-snippet speaker metadata is optional and should be omitted when unknown rather than blocking note capture.
 - A thread is considered never fully distilled when `deep_distilled_at` is null or `distillation_state` is `pending`.
 - A thread is considered interrupted when `last_deep_distill_attempt_at` is newer than `deep_distilled_at`, or when `distillation_state` is `pending` and `thread_status` is still `closed`.
@@ -1077,9 +1118,9 @@ The lifecycle is fixed:
 
 1. thread created in `memory/threads/open/YYYY/`
 2. snippets appended through `capture_note.py`
-3. the agent drafts a `Current Summary` update and `apply_thread_update.py` applies it
-4. the agent drafts thread-local open-question and candidate-action updates and `apply_thread_update.py` applies them
-5. thread frontmatter sets `distillation_state: pending`
+3. the agent edits `## Current Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes` directly in the thread file
+4. `sync_thread_state.py` refreshes thread metadata and generated views
+5. thread frontmatter remains or becomes `distillation_state: pending`
 6. explicit deep distillation updates canonical topics/action items and generated views
 7. if closed, the file moves to `memory/threads/closed/YYYY/`
 8. `deep_distilled_at` is set and `distillation_state: complete`
@@ -1109,9 +1150,9 @@ Lightweight distillation is agent-led and happens on every successful note appen
 It must do all of the following:
 
 - update the thread/import summary,
-- apply the agent-authored summary update through a structural script,
+- write the summary update directly,
 - update thread/import-local open questions,
-- apply agent-authored open-question and candidate-action updates through a structural script,
+- write open-question and candidate-action updates directly,
 - identify obvious topic references,
 - identify explicit action items,
 - mark the source record as `distillation_state: pending`,
@@ -1406,7 +1447,8 @@ For avoidance of doubt:
 ## Manual Editing Rules
 
 - Files under `memory/views/` and topic type index files are generated-only.
-- Thread documents and import records are script-owned and must not be manually edited except in emergencies.
+- Thread documents and import records must not have raw snippets, source metadata, or frontmatter lifecycle fields edited manually outside the defined workflow scripts.
+- Derived natural-language sections in thread documents, import records, topics, and action-item documents may be edited directly by the agent as part of the normal workflow.
 - Topic and action-item documents may be manually edited only in `## Manual Notes` and in safe frontmatter fields:
   - `aliases`
   - `status` for topics

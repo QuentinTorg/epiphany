@@ -36,3 +36,5 @@ Current test coverage is focused on the first implementation slice:
 - Git ignore handling for runtime state,
 - thread creation during note capture,
 - thread-local summary and status updates.
+- wrapper JSON-envelope behavior and actionable error handling,
+- canonical action-item creation and filtering.

@@ -1,17 +1,17 @@
-"""Thread capture and thread-local update operations."""
+"""Thread capture and thread-local sync operations."""
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
+from .action_items import upsert_action_items
 from .documents import next_snippet_id, parse_thread_body, preview_from_text, render_snippet, render_thread_body
 from .errors import WorkspaceError
 from .frontmatter import load_markdown, write_markdown
 from .paths import memory_root, parse_year_from_timestamp, relpath, resolve_workspace_root, thread_path_from_slug, thread_roots
 from .time_utils import current_timestamp
-from .views import rebuild_open_threads_view, rebuild_pending_distillation_view, rebuild_workspace_readme
+from .views import rebuild_open_threads_view, rebuild_pending_distillation_view, rebuild_static_views, rebuild_workspace_readme
 
 
 def _thread_placeholders() -> dict[str, str]:
@@ -158,78 +158,6 @@ def capture_note(
     }
 
 
-def _load_update_json(update_json: str) -> dict[str, Any]:
-    if update_json.startswith("@"):
-        update_json = Path(update_json[1:]).read_text(encoding="utf-8")
-    try:
-        payload = json.loads(update_json)
-    except json.JSONDecodeError as exc:
-        raise WorkspaceError(
-            "invalid_update_json",
-            "Could not parse --update-json as JSON.",
-            "Pass inline JSON or @path/to/file.json.",
-        ) from exc
-    if not isinstance(payload, dict):
-        raise WorkspaceError(
-            "invalid_update_json",
-            "Update payload must be a JSON object.",
-            "Pass a JSON object with the required update fields.",
-        )
-    return payload
-
-
-def apply_thread_update(
-    *,
-    thread_path: str,
-    update_json: str,
-    workspace_root: str | None = None,
-    dry_run: bool = False,
-) -> dict[str, object]:
-    root = resolve_workspace_root(workspace_root)
-    path = Path(thread_path).resolve()
-    frontmatter, sections = _load_thread(path)
-    payload = _load_update_json(update_json)
-
-    required_keys = {
-        "summary_markdown": "summary",
-        "open_questions_markdown": "open_questions",
-        "candidate_action_items_markdown": "candidate_action_items",
-        "distillation_notes_markdown": "distillation_notes",
-    }
-    for payload_key, section_key in required_keys.items():
-        if payload_key not in payload:
-            raise WorkspaceError(
-                "missing_update_field",
-                f"Update payload is missing required field {payload_key!r}.",
-                "Include all required thread update fields.",
-            )
-        sections[section_key] = str(payload[payload_key]).strip()
-
-    frontmatter["primary_topic_refs"] = list(payload.get("primary_topic_refs", frontmatter.get("primary_topic_refs", [])))
-    frontmatter["primary_entity_refs"] = list(payload.get("primary_entity_refs", frontmatter.get("primary_entity_refs", [])))
-    if "action_item_refs" in payload:
-        frontmatter["action_item_refs"] = list(payload["action_item_refs"])
-    frontmatter["light_distilled_at"] = current_timestamp()
-    frontmatter["last_updated_at"] = current_timestamp()
-    frontmatter["distillation_state"] = "pending"
-    frontmatter["pending_reason"] = list(payload.get("pending_reason", frontmatter.get("pending_reason", []))) or ["new-snippets"]
-    frontmatter["preview"] = preview_from_text(sections["summary"], "Open thread with captured notes.")
-
-    updated = [relpath(path, root)]
-    if not dry_run:
-        _write_thread(path, frontmatter, sections)
-        updated.extend(rebuild_open_threads_view(root))
-        updated.extend(rebuild_pending_distillation_view(root))
-        updated.extend(rebuild_workspace_readme(root))
-
-    return {
-        "thread_path": relpath(path, root),
-        "thread_id": frontmatter["id"],
-        "light_distilled_at": frontmatter["light_distilled_at"],
-        "paths_updated": updated,
-    }
-
-
 def get_thread_status(
     *,
     thread_path: str | None = None,
@@ -264,4 +192,57 @@ def get_thread_status(
         "primary_entity_refs": frontmatter.get("primary_entity_refs", []),
         "action_item_refs": frontmatter.get("action_item_refs", []),
         "snippet_count": len(snippets),
+    }
+
+
+def sync_thread_state(
+    *,
+    thread_path: str,
+    workspace_root: str | None = None,
+    canonical_action_items: list[dict[str, Any]] | None = None,
+    dry_run: bool = False,
+) -> dict[str, object]:
+    """Refresh thread metadata and related views after direct agent edits."""
+    root = resolve_workspace_root(workspace_root)
+    path = Path(thread_path).resolve()
+    frontmatter, sections = _load_thread(path)
+
+    now = current_timestamp()
+    frontmatter["preview"] = preview_from_text(sections["summary"], "Open thread with captured notes.")
+    frontmatter["last_updated_at"] = now
+    frontmatter["light_distilled_at"] = now
+    frontmatter["distillation_state"] = "pending"
+
+    pending = list(frontmatter.get("pending_reason", []))
+    if "new-snippets" not in pending:
+        pending.append("new-snippets")
+    frontmatter["pending_reason"] = pending
+
+    action_item_paths_updated: list[str] = []
+    if canonical_action_items:
+        action_item_result = upsert_action_items(
+            workspace_root=str(root),
+            items=canonical_action_items,
+            source_thread_ref=frontmatter["id"],
+            dry_run=dry_run,
+        )
+        frontmatter["action_item_refs"] = list(action_item_result["action_item_refs"])
+        action_item_paths_updated.extend(action_item_result["paths_updated"])
+
+    updated = [relpath(path, root)]
+    if not dry_run:
+        _write_thread(path, frontmatter, sections)
+        if canonical_action_items:
+            updated.extend(rebuild_static_views(root))
+        updated.extend(rebuild_open_threads_view(root))
+        updated.extend(rebuild_pending_distillation_view(root))
+        updated.extend(rebuild_workspace_readme(root))
+        updated.extend(action_item_paths_updated)
+
+    return {
+        "thread_path": relpath(path, root),
+        "thread_id": frontmatter["id"],
+        "light_distilled_at": frontmatter["light_distilled_at"],
+        "paths_updated": updated,
+        "action_item_refs": frontmatter.get("action_item_refs", []),
     }

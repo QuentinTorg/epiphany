@@ -6,8 +6,10 @@ from pathlib import Path
 
 from .documents import parse_thread_body, preview_from_text, render_generated_doc
 from .frontmatter import load_markdown, write_markdown
+from .action_items import list_action_items
 from .paths import (
     TOPIC_TYPES,
+    action_items_root,
     imports_root,
     memory_root,
     relpath,
@@ -130,6 +132,25 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
     workspace_root = resolve_workspace_root(str(workspace_root))
     updated: list[str] = []
 
+    action_item_result = list_action_items(workspace_root=str(workspace_root), include_closed=False)
+    task_lines: list[str] = []
+    question_lines: list[str] = []
+    for item in action_item_result["items"]:
+        line = (
+            f"- `{item['title']}` ({item['path']}) | status `{item['status']}` | "
+            f"confidence `{item['confidence']}`"
+        )
+        if item["owner_topic_refs"]:
+            line += f" | owners `{', '.join(item['owner_topic_refs'])}`"
+        if item["linked_topic_refs"]:
+            line += f" | topics `{', '.join(item['linked_topic_refs'])}`"
+        if item["due_at"]:
+            line += f" | due `{item['due_at']}`"
+        if item["kind"] == "task":
+            task_lines.append(line)
+        else:
+            question_lines.append(line)
+
     static_views = {
         view_root(workspace_root) / "imports.md": (
             "Imports",
@@ -141,7 +162,10 @@ def rebuild_static_views(workspace_root: Path) -> list[str]:
             "Action Items",
             "action-items",
             "Lists open tasks and open questions.",
-            [("## Open Tasks", "No open tasks yet."), ("## Open Questions", "No open questions yet.")],
+            [
+                ("## Open Tasks", "\n".join(task_lines) if task_lines else "No open tasks yet."),
+                ("## Open Questions", "\n".join(question_lines) if question_lines else "No open questions yet."),
+            ],
         ),
         topics_root(workspace_root) / "index.md": (
             "Topics Index",
@@ -204,10 +228,11 @@ def rebuild_workspace_readme(workspace_root: Path) -> list[str]:
     workspace_root = resolve_workspace_root(str(workspace_root))
     open_threads = len(list((memory_root(workspace_root) / "threads" / "open").glob("*/*.md")))
     imports_count = len(list((imports_root(workspace_root) / "records").glob("*/*.md")))
+    open_action_items = len(list((action_items_root(workspace_root) / "open").glob("*/*.md")))
     body = render_generated_doc(
         title="Workspace Memory Index",
         sections=[
-            ("## Workspace Summary", f"Open threads: {open_threads}\nImports: {imports_count}\nAction items: 0"),
+            ("## Workspace Summary", f"Open threads: {open_threads}\nImports: {imports_count}\nAction items: {open_action_items}"),
             (
                 "## Key Navigation",
                 "\n".join(
