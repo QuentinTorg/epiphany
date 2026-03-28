@@ -36,13 +36,14 @@ def _list_open_threads(workspace_root: Path) -> list[dict[str, object]]:
                 "path": path,
                 "title": frontmatter["title"],
                 "preview": frontmatter.get("preview", ""),
+                "last_captured_at": frontmatter.get("last_captured_at", frontmatter["opened_at"]),
                 "last_updated_at": frontmatter["last_updated_at"],
                 "distillation_state": frontmatter["distillation_state"],
-                "stale": frontmatter["last_updated_at"][:10] != today,
+                "stale": frontmatter.get("last_captured_at", frontmatter["opened_at"])[:10] != today,
                 "open_question_count": len(open_questions_lines),
             }
         )
-    results.sort(key=lambda item: item["last_updated_at"], reverse=True)
+    results.sort(key=lambda item: (item["last_captured_at"], item["last_updated_at"]), reverse=True)
     return results
 
 
@@ -55,7 +56,7 @@ def rebuild_open_threads_view(workspace_root: Path) -> list[str]:
         rel = relpath(item["path"], workspace_root)
         line = (
             f"- `{item['title']}` "
-            f"({rel}) | updated `{item['last_updated_at']}` | distillation `{item['distillation_state']}`\n"
+            f"({rel}) | captured `{item['last_captured_at']}` | updated `{item['last_updated_at']}` | distillation `{item['distillation_state']}`\n"
             f"  Preview: {item['preview'] or 'No preview yet.'}\n"
             f"  Open question count: {item['open_question_count']}"
         )

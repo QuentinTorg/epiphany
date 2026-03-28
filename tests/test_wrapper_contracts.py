@@ -167,6 +167,7 @@ def test_thread_status_wrapper_reports_current_thread_state(tmp_path: Path) -> N
     assert payload["ok"] is True
     assert payload["result"]["thread_status"] == "open"
     assert payload["result"]["distillation_state"] == "pending"
+    assert payload["result"]["last_captured_at"]
 
 
 def test_sync_thread_state_wrapper_refreshes_preview_after_direct_edit(tmp_path: Path) -> None:
@@ -212,3 +213,57 @@ def test_sync_thread_state_wrapper_refreshes_preview_after_direct_edit(tmp_path:
     assert payload["result"]["thread_path"].endswith("robot-debugging.md")
     refreshed = thread_path.read_text(encoding="utf-8")
     assert 'preview: "Billy investigated robot connectivity and needs to retest tomorrow."' in refreshed
+
+
+def test_query_memory_wrapper_returns_candidates_and_pending_warnings(tmp_path: Path) -> None:
+    """Intent: query wrapper should expose coarse retrieval results and pending-distillation warnings via the common envelope."""
+    _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
+    capture = _parse_json_stdout(
+        _run(
+            [
+                "skills/capturing-notes/scripts/capture_note.py",
+                "--workspace-root",
+                str(tmp_path),
+                "--thread-slug",
+                "robot-debugging",
+                "--thread-title",
+                "Robot Debugging",
+                "--create-if-missing",
+                "--stdin-body",
+                "Billy investigated the connectivity issue.",
+            ]
+        )
+    )
+    thread_path = tmp_path / capture["result"]["thread_path"]
+    contents = thread_path.read_text(encoding="utf-8")
+    contents = contents.replace(
+        "Summary pending. [sources: ]",
+        f"Billy investigated robot connectivity and needs to retest tomorrow. [sources: {capture['result']['thread_id']}#snp-0001]",
+    )
+    thread_path.write_text(contents, encoding="utf-8")
+    _run(
+        [
+            "skills/capturing-notes/scripts/sync_thread_state.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--thread-path",
+            str(thread_path),
+        ]
+    )
+
+    completed = _run(
+        [
+            "skills/querying-notes/scripts/query_memory.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--query",
+            "Billy connectivity",
+        ]
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = _parse_json_stdout(completed)
+    assert payload["ok"] is True
+    assert payload["result"]["candidates"]
+    assert payload["warnings"]
+    assert any(candidate["path"].endswith("robot-debugging.md") for candidate in payload["result"]["candidates"])

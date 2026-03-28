@@ -33,6 +33,7 @@ def _new_thread_frontmatter(*, slug: str, title: str, timestamp: str) -> dict[st
         "thread_status": "open",
         "source_type": "conversation",
         "opened_at": timestamp,
+        "last_captured_at": timestamp,
         "last_updated_at": timestamp,
         "closed_at": None,
         "distillation_state": "pending",
@@ -128,6 +129,7 @@ def capture_note(
     sections["snippets"] = f"{sections['snippets'].rstrip()}\n\n{snippet}".strip() if sections["snippets"].strip() else snippet
 
     frontmatter["last_updated_at"] = ts
+    frontmatter["last_captured_at"] = ts
     frontmatter["distillation_state"] = "pending"
     pending = list(frontmatter.get("pending_reason", []))
     if "new-snippets" not in pending:
@@ -185,6 +187,7 @@ def get_thread_status(
         "preview": frontmatter["preview"],
         "thread_status": frontmatter["thread_status"],
         "distillation_state": frontmatter["distillation_state"],
+        "last_captured_at": frontmatter.get("last_captured_at", frontmatter["opened_at"]),
         "last_updated_at": frontmatter["last_updated_at"],
         "open_questions": sections["open_questions"],
         "candidate_action_items": sections["candidate_action_items"],

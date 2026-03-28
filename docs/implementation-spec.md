@@ -470,7 +470,7 @@ Clarification:
 - it only refreshes metadata and generated views based on the already-edited thread and any explicitly provided canonical action-item payload,
 - the automatic "bubble up" is limited to mechanical rollups that can be derived without semantic rewriting, including:
   - refreshing thread frontmatter fields such as `preview`, `last_updated_at`, `light_distilled_at`, and pending-state metadata,
-  - updating `memory/views/open-threads.md` with the thread title, path, last updated time, distillation state, preview, and open-question count derived from the thread body,
+  - updating `memory/views/open-threads.md` with the thread title, path, last captured time, last updated time, distillation state, preview, and open-question count derived from the thread body,
   - updating `memory/views/pending-distillation.md` with the thread path, thread state, and pending reasons,
   - updating `memory/README.md` counts and navigation links,
   - rebuilding `memory/views/action-items.md` only when the agent explicitly provided canonical action-item payload for structured upsert,
@@ -523,7 +523,7 @@ Unless explicitly overridden, all wrappers must treat the current working direct
   - Purpose: refresh thread metadata and generated views after direct agent edits to thread-local derived prose sections.
   - Automatic scope:
     - recompute thread preview from the edited `## Current Summary`,
-    - stamp thread-local timestamps and pending-state metadata,
+    - stamp thread-local update timestamps and pending-state metadata,
     - rebuild the open-threads, pending-distillation, and workspace-entrypoint views,
     - optionally upsert canonical action items and rebuild the action-items view when the agent explicitly passes structured action-item payload.
   - Non-goals:
@@ -549,6 +549,11 @@ Unless explicitly overridden, all wrappers must treat the current working direct
 
 - `query_memory.py`
   - Purpose: perform coarse retrieval across topics, action items, threads, imports, and generated views and return candidate paths, metadata, and excerpts for agent-led synthesis.
+  - Time filtering must use the source-native date where possible:
+    - threads use `opened_at` as the primary time axis,
+    - action items use their canonical record timestamps,
+    - imports use `imported_at`,
+    - generated views and entrypoints may fall back to `updated_at`.
   - Required arguments:
     - `--query`
   - Optional arguments:
@@ -756,6 +761,7 @@ preview: <short thread state summary>
 thread_status: open | closed
 source_type: conversation
 opened_at: <timestamp>
+last_captured_at: <timestamp>
 last_updated_at: <timestamp>
 closed_at: <timestamp or null>
 distillation_state: pending | complete
@@ -809,6 +815,8 @@ Decisions:
 - Raw snippets and thread frontmatter/state transitions must be modified through scripts.
 - Derived thread-local prose sections are edited directly by the agent.
 - Per-snippet speaker metadata is optional and should be omitted when unknown rather than blocking note capture.
+- `last_captured_at` tracks when the most recent raw snippet was appended.
+- `last_updated_at` tracks the most recent structural or derived-state update to the thread document.
 - A thread is considered never fully distilled when `deep_distilled_at` is null or `distillation_state` is `pending`.
 - A thread is considered interrupted when `last_deep_distill_attempt_at` is newer than `deep_distilled_at`, or when `distillation_state` is `pending` and `thread_status` is still `closed`.
 
@@ -1134,7 +1142,7 @@ When new notes arrive, the agent must choose between an existing open thread and
 1. If there is exactly one clearly related open thread, append to it.
 2. If there are no clearly related open threads, create a new thread.
 3. If there are multiple plausible open threads, ask the user before choosing.
-4. If the best-matching open thread was last updated on a prior day, treat it as stale-open and ask whether to resume it or start a new thread.
+4. If the best-matching open thread last captured a snippet on a prior day, treat it as stale-open and ask whether to resume it or start a new thread.
 
 Closed threads are not reopened by default.
 
@@ -1235,7 +1243,7 @@ A thread or import record is pending if any of the following is true:
 - `deep_distilled_at` is null
 - `last_deep_distill_attempt_at` is newer than `deep_distilled_at`
 
-Open threads from a prior day are considered `stale-open`. They are not automatically pending-close, but they must appear in the open-thread and recovery surfaces so the agent can ask whether to resume, distill, or close them.
+Open threads whose `last_captured_at` is from a prior day are considered `stale-open`. They are not automatically pending-close, but they must appear in the open-thread and recovery surfaces so the agent can ask whether to resume, distill, or close them.
 
 ### Recovery index
 
@@ -1424,7 +1432,7 @@ The implementation must generate these views:
 - `memory/topics/custom/index.md` lists approved custom topic-type groups.
 - if custom topic types exist, each `memory/topics/custom/<custom-type>/index.md` lists the topics in that custom group.
 - `memory/views/action-items.md` lists open tasks and open questions grouped by kind and status, with owner, linked topics, due date, and confidence where present.
-- `memory/views/open-threads.md` is a compact live-session routing surface. It lists all open threads with title, last updated time, distillation state, preview, and open-question count.
+- `memory/views/open-threads.md` is a compact live-session routing surface. It lists all open threads with title, last captured time, last updated time, distillation state, preview, and open-question count.
 - `memory/views/open-threads.md` must call out stale-open threads separately.
 - `memory/views/imports.md` lists imported source records with title, source format, imported time, and distillation state.
 - `memory/views/pending-distillation.md` is the recovery queue. It lists anything needing deep reconciliation, the source type, why it is pending, and its last attempted distillation time.
