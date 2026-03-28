@@ -1383,15 +1383,16 @@ The implementation must generate these views:
 - `memory/topics/custom/index.md` lists approved custom topic-type groups.
 - if custom topic types exist, each `memory/topics/custom/<custom-type>/index.md` lists the topics in that custom group.
 - `memory/views/action-items.md` lists open tasks and open questions grouped by kind and status, with owner, linked topics, due date, and confidence where present.
-- `memory/views/open-threads.md` lists all open threads with title, last updated time, top open questions, and distillation state.
+- `memory/views/open-threads.md` is a compact live-session routing surface. It lists all open threads with title, last updated time, distillation state, preview, and open-question count.
 - `memory/views/open-threads.md` must call out stale-open threads separately.
 - `memory/views/imports.md` lists imported source records with title, source format, imported time, and distillation state.
-- `memory/views/pending-distillation.md` lists anything needing deep reconciliation, why it is pending, and its last attempted distillation time.
+- `memory/views/pending-distillation.md` is the recovery queue. It lists anything needing deep reconciliation, the source type, why it is pending, and its last attempted distillation time.
 
 For avoidance of doubt:
 
 - `memory/README.md` is a starting surface, not a second copy of the operational views,
 - `memory/views/open-threads.md`, `memory/views/imports.md`, `memory/views/action-items.md`, and `memory/views/pending-distillation.md` are the authoritative detailed generated listings for those domains.
+- `memory/views/open-threads.md` and `memory/views/pending-distillation.md` intentionally remain separate because "currently open" and "still needs deep reconciliation" are different states that only partially overlap.
 
 ### View update policy
 
