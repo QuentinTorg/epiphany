@@ -7,3 +7,5 @@ Skills should be standalone. They must fully provide context the calling agent t
 All information the agent needs must be contained in the skills directory and properly referenced from that file to other reference files.
 
 Any files in this repo that are not in the [skills](skills) directory or directly referenced by a skill will not be available to the agent for skills. Directories like [docs](docs) and [tests](tests) are only meant to be used for reference during development.
+
+The [docs/implementation-spec.md](docs/implementation-spec.md) exists to drive development. Unless explicitly requested, the implementation spec should not be modified to match the current implementation. It should be used as a source of truth to drive all implementation decisions. Any contraditions to the spec should be brought up and discussed with the user immediately so it can be resolved appropriately

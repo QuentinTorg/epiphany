@@ -71,16 +71,23 @@ In practice, the workflow looks like this:
 
 ## Quickstart
 
-The shortest useful path is:
+This repository is meant to be installed or exposed as a skill package for an agent. The normal quickstart is therefore:
 
-1. Make or choose a user-owned workspace repository.
-2. Bootstrap the workspace so it gets the expected `memory/` structure.
-3. Start capturing notes into a thread.
-4. Let the agent update the thread summary directly.
-5. Run the lightweight sync step so metadata and views stay current.
-6. Ask questions against the workspace or distill the thread more deeply when needed.
+1. Install or expose the [`skills`](skills) directory using your agent client's skill-loading mechanism.
+2. Create or choose a separate user-owned workspace where notes should live.
+3. Start the agent in that workspace root.
+4. Use natural-language requests to capture notes, ingest documents, and query prior information.
 
-Conceptually, the flow looks like this:
+This repository does not prescribe one client-specific installation path. The exact setup depends on your agent environment, but the important requirement is that the agent can discover the skill directories under [`skills`](skills).
+
+The four user-facing skills are:
+
+- `capturing-notes`
+- `querying-notes`
+- `distilling-threads`
+- `ingesting-documents`
+
+Once those skills are available to the agent, the expected workspace shape is:
 
 ```text
 user workspace/
@@ -94,41 +101,34 @@ user workspace/
 └── other user files...
 ```
 
-Typical first workflow:
+You should not need to invoke the bundled scripts manually during normal use. Those scripts are the implementation surface the agent uses behind the scenes to keep the workspace structurally consistent.
 
-```bash
-# Run from the user's workspace root.
-python /path/to/skill-repo/skills/shared/scripts/bootstrap_workspace.py
+## Basic Workflow
 
-# Capture a note into a thread.
-python /path/to/skill-repo/skills/capturing-notes/scripts/capture_note.py \
-  --title "Robot Debugging" \
-  --content "Billy debugged Rover 3 CAN bus dropouts. Need to retest Friday."
+After the skills are active, the normal workflow is conversational:
 
-# The agent edits the thread summary directly in memory/threads/open/...
+1. Ask the agent to remember rough notes as you work.
+2. Ask the agent to import external documents when they should become part of memory.
+3. Ask direct questions later and expect concise cited answers.
+4. Ask the agent to reconcile or close threads when you want deeper distillation.
 
-# Refresh thread metadata and generated views after the edit.
-python /path/to/skill-repo/skills/capturing-notes/scripts/sync_thread_state.py \
-  --thread-path memory/threads/open/2026/2026-03-28-robot-debugging.md
-```
+Representative prompts:
 
-After that, the workspace is already useful:
+- `Remember this: Billy debugged Rover 3 CAN bus dropouts and wants to retest Friday.`
+- `Import this requirements document into memory and summarize what matters.`
+- `What was Billy working on last week?`
+- `What is still blocked on Rover 3?`
+- `Close out the current robot-debugging thread and reconcile it into the workspace.`
 
-- `memory/README.md` gives the top-level map,
-- `memory/views/open-threads.md` shows active thread routing,
-- `memory/views/action-items.md` shows canonical operational state,
-- thread files preserve the evidence and the rolling summary.
+In normal use, the agent should handle:
 
-Later workflows build on that same loop:
+- bootstrapping the workspace when needed,
+- choosing or creating the right thread,
+- updating summaries and action state,
+- ingesting source documents,
+- retrieving information with citations.
 
-- use `query_memory.py` to narrow the search space before answering a question,
-- use `apply_distillation_result.py` after the agent has prepared a deep-distillation update,
-- use `ingest_document.py` when adding external source material.
-
-The exact commands may vary by agent client, but the core model stays the same:
-
-- the agent does the semantic work,
-- the scripts keep the workspace structurally consistent.
+If you are developing or testing the implementation itself, the wrapper scripts and their contracts are documented in the skill files and implementation docs. That is a development workflow, not the primary end-user quickstart.
 
 ## Input Flexibility
 
