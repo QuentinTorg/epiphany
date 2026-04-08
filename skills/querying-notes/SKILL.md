@@ -3,7 +3,7 @@ name: querying-notes
 description: Use this skill when the user asks questions about stored notes, action items, people, projects, systems, or prior decisions in the workspace. It teaches progressive-disclosure retrieval and uses coarse query tools to narrow candidate files before the agent synthesizes the answer.
 compatibility: Requires Python 3 and a readable note-taking workspace with generated views and canonical records.
 metadata:
-  owner: ai-notes-2
+  owner: epiphany
 ---
 
 # Querying Notes

@@ -1,4 +1,4 @@
-# Implementation Roadmap: Agentic Notes Workspace
+# Implementation Roadmap: Epiphany
 
 ## Purpose
 

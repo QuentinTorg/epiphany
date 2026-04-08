@@ -1,4 +1,4 @@
-# Agentic Notes Workspace
+# Epiphany
 
 This repository contains a skill-based note-taking system designed to turn a normal workspace into an agent-usable memory base.
 

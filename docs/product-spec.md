@@ -1,8 +1,8 @@
-# Product Spec: Agentic Notes Workspace
+# Product Spec: Epiphany
 
 ## Overview
 
-The Agentic Notes Workspace is a repository-backed note-taking system that turns rough user input into durable memory, structured action state, and useful answers later. It is designed to behave like an active note-taking assistant rather than a passive storage mechanism.
+Epiphany is a repository-backed note-taking system that turns rough user input into durable memory, structured action state, and useful answers later. It is designed to behave like an active note-taking assistant rather than a passive storage mechanism.
 
 The product captures raw evidence exactly as the user provides it, distills that evidence into living summaries of current understanding, tracks actionable and unresolved items, and helps the user retrieve information later without rereading the entire workspace.
 

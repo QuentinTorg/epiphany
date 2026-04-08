@@ -1,9 +1,9 @@
 ---
 name: distilling-threads
 description: Use this skill when the user asks to reconcile notes, bubble thread or import knowledge into canonical topics and action items, recover pending distillation work, or explicitly close a thread. It applies agent-authored deep-distillation results with the distillation scripts and refreshes canonical views.
-compatibility: Requires Python 3, a writable workspace root, and the Agentic Notes Workspace layout.
+compatibility: Requires Python 3, a writable workspace root, and the Epiphany workspace layout.
 metadata:
-  owner: ai-notes-2
+  owner: epiphany
 ---
 
 # Distilling Threads

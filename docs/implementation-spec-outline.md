@@ -1,8 +1,8 @@
-# Implementation Spec Outline: Agentic Notes Workspace
+# Implementation Spec Outline: Epiphany
 
 ## Purpose
 
-This document outlines the implementation design for the Agentic Notes Workspace described in [product-spec.md](product-spec.md). It translates the product commitments into a concrete architecture, skill split, shared tool layer, and workspace state model.
+This document outlines the implementation design for Epiphany as described in [product-spec.md](product-spec.md). It translates the product commitments into a concrete architecture, skill split, shared tool layer, and workspace state model.
 
 This is an implementation-spec outline rather than a full low-level design. It defines the major implementation decisions, component boundaries, and responsibilities that the full implementation spec should elaborate.
 

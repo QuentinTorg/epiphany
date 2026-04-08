@@ -1,4 +1,4 @@
-# Implementation Spec: Agentic Notes Workspace
+# Implementation Spec: Epiphany
 
 ## Table Of Contents
 
@@ -73,7 +73,7 @@
 
 ## Purpose
 
-This document is the decision-complete implementation specification for the Agentic Notes Workspace defined in [product-spec.md](product-spec.md).
+This document is the decision-complete implementation specification for Epiphany as defined in [product-spec.md](product-spec.md).
 
 It defines:
 

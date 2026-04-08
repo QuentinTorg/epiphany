@@ -1,9 +1,9 @@
 ---
 name: capturing-notes
 description: Use this skill when the user is adding rough notes, continuing an active note-taking session, or asking to append information into a thread. It handles thread selection, raw snippet capture, direct editing of thread-local derived prose, and structural follow-up with the capture and sync scripts.
-compatibility: Requires Python 3, a writable workspace root, and the Agentic Notes Workspace layout.
+compatibility: Requires Python 3, a writable workspace root, and the Epiphany workspace layout.
 metadata:
-  owner: ai-notes-2
+  owner: epiphany
 ---
 
 # Capturing Notes

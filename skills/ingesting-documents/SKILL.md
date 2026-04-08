@@ -3,7 +3,7 @@ name: ingesting-documents
 description: Use this skill when the user wants to add an external document such as markdown, text, docx, or pdf into the workspace as evidence. It stages the source file, creates normalized text and an import record, then uses direct import-record edits plus structural follow-up for later deep distillation.
 compatibility: Requires Python 3, a writable workspace root, and local PDF extraction support for pdf ingestion.
 metadata:
-  owner: ai-notes-2
+  owner: epiphany
 ---
 
 # Ingesting Documents

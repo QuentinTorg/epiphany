@@ -1,4 +1,4 @@
-"""Shared implementation for the Agentic Notes Workspace."""
+"""Shared implementation for Epiphany."""
 
 from .action_items import list_action_items, upsert_action_items
 from .bootstrap import bootstrap_workspace
