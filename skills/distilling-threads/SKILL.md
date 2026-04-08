@@ -17,6 +17,7 @@ Read [../shared/references/recovery-policy.md](../shared/references/recovery-pol
 Read [references/deep-distillation-checklist.md](references/deep-distillation-checklist.md) before preparing a distillation payload.
 Read [references/recovery-workflow.md](references/recovery-workflow.md) when the user asks to recover pending work.
 Read [references/close-thread-git-prompt.md](references/close-thread-git-prompt.md) during an explicit close-thread workflow.
+Read [references/script-invocations.md](references/script-invocations.md) before running distillation scripts if you need argument guidance.
 Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) when writing topic or action-item prose.
 
 ## Available scripts

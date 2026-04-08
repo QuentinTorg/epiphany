@@ -42,6 +42,16 @@ Treat these as internal implementation modules, not normal direct entrypoints:
 
 The internal modules exist to support the wrapper scripts. Do not call them directly unless a future skill explicitly says to do so.
 
+## Common argument defaults
+
+Use these defaults unless a skill-specific reference says otherwise:
+
+- omit `--workspace-root` when the current working directory is already the target workspace root
+- prefer explicit `--*-path` selectors over slug selectors when the exact file is already known
+- use slug selectors only when the exact file path is not already known
+- use `--dry-run` only for preview or verification, not for the normal workflow
+- use paging or output flags such as `--limit`, `--offset`, or `--output-file` only when the result set is large enough to need them
+
 ## Which script to use when
 
 Use these wrappers for these jobs:

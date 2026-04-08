@@ -16,6 +16,7 @@ Read [../shared/references/action-item-policy.md](../shared/references/action-it
 Read [references/thread-selection.md](references/thread-selection.md) when you need to decide whether to append to an existing thread or start a new one.
 Read [references/lightweight-distillation.md](references/lightweight-distillation.md) before performing the thread-local synthesis update.
 Read [references/capture-edge-cases.md](references/capture-edge-cases.md) when routing or task extraction is ambiguous.
+Read [references/script-invocations.md](references/script-invocations.md) before running capture scripts if you need argument guidance.
 Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) if you are writing or revising thread-local summaries.
 
 ## Available scripts
@@ -52,6 +53,7 @@ Read [../shared/references/citation-rules.md](../shared/references/citation-rule
 ## Gotchas
 
 - `capture_note.py` does not summarize. It only appends raw evidence and thread metadata.
+- In normal capture, do not pass `--timestamp`; let `capture_note.py` stamp the current time internally. Use `--timestamp` only when the note must be recorded with a different time.
 - `sync_thread_state.py` does not decide what changed semantically. Edit the thread prose first, then sync.
 - Stale-open routing is based on `last_captured_at`, not on later metadata touches.
 - Do not close a thread from this skill. Use `distilling-threads` when the user asks to reconcile or close.

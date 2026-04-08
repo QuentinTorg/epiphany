@@ -17,6 +17,7 @@ Read [references/ingestion-checklist.md](references/ingestion-checklist.md) befo
 Read [references/import-conversion-policy.md](references/import-conversion-policy.md) before choosing how to stage the source.
 Read [references/large-document-reading.md](references/large-document-reading.md) before reading a large normalized source.
 Read [references/import-distillation-policy.md](references/import-distillation-policy.md) when deciding whether to continue into deep reconciliation now.
+Read [references/script-invocations.md](references/script-invocations.md) before running ingestion scripts if you need argument guidance.
 Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) before editing the import record summary.
 
 ## Available scripts

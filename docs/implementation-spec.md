@@ -1530,19 +1530,23 @@ Each user-facing skill must also define focused local references so `SKILL.md` c
   - `thread-selection.md`
   - `lightweight-distillation.md`
   - `capture-edge-cases.md`
+  - `script-invocations.md`
 - `querying-notes/references/`
   - `retrieval-checklist.md`
   - `answer-style.md`
   - `query-escalation.md`
+  - `script-invocations.md`
 - `distilling-threads/references/`
   - `deep-distillation-checklist.md`
   - `recovery-workflow.md`
   - `close-thread-git-prompt.md`
+  - `script-invocations.md`
 - `ingesting-documents/references/`
   - `ingestion-checklist.md`
   - `import-conversion-policy.md`
   - `large-document-reading.md`
   - `import-distillation-policy.md`
+  - `script-invocations.md`
 
 ## Evaluation And Testing
 

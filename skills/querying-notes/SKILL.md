@@ -15,6 +15,7 @@ Read [../shared/references/recovery-policy.md](../shared/references/recovery-pol
 Read [references/retrieval-checklist.md](references/retrieval-checklist.md) for the exact retrieval order.
 Read [references/query-escalation.md](references/query-escalation.md) when deciding how far to drill into evidence.
 Read [references/answer-style.md](references/answer-style.md) before drafting the final answer.
+Read [references/script-invocations.md](references/script-invocations.md) before running query scripts if you need argument guidance.
 Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) before drafting the final answer.
 
 ## Available scripts
