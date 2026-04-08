@@ -43,17 +43,24 @@ Use `--dry-run` only for preview or verification.
 
 Always provide:
 
-- the import record path selector expected by the script
+- `--import-record-path`
 
 Use only when needed:
 
-- canonical action-item payload
+- `--canonical-action-items-json`
 - `--workspace-root`
 - `--dry-run`
 
+Example:
+
+```bash
+python scripts/sync_import_state.py \
+  --import-record-path memory/imports/records/2026/2026-04-08-rover-3-requirements.md
+```
+
 Run this only after you already edited the import record directly.
 
-Pass the canonical action-item payload only when you already prepared explicit canonical action-item upserts.
+Pass `--canonical-action-items-json` only when you already prepared explicit canonical action-item upserts.
 
 Use `--workspace-root` only when the current working directory is not already the target workspace root.
 

@@ -18,7 +18,7 @@ Use `--all` as the normal recovery-review mode.
 
 Use `--thread-slug` or `--import-slug` only when the recovery target is already known and you are intentionally narrowing the recovery queue.
 
-Use `--output-file` only when the result set is large enough that file output is genuinely useful.
+Use `--dry-run` only when you want to confirm what the recovery queue contains without treating the call as an actual recovery step.
 
 Use `--workspace-root` only when the current working directory is not already the target workspace root.
 
@@ -29,10 +29,10 @@ Always provide:
 - one explicit source selector:
   - `--thread-path`, or
   - `--import-record-path`
-- `--update-json`
 
 Use only when needed:
 
+- `--update-json`
 - `--close-thread`
 - `--rebuild-views`
 - `--dry-run`
@@ -54,6 +54,8 @@ python scripts/apply_distillation_result.py \
 ```
 
 Prefer explicit file paths over slug lookup when the exact source file is already known.
+
+Pass `--update-json` when you are applying actual source, topic, or action-item mutations.
 
 Use `--close-thread` only during an explicit close-thread workflow.
 

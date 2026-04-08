@@ -43,6 +43,7 @@ def test_bootstrap_wrapper_emits_common_json_envelope(tmp_path: Path) -> None:
     assert isinstance(payload["paths_created"], list)
     assert isinstance(payload["paths_updated"], list)
     assert isinstance(payload["result"], dict)
+    assert "OK: bootstrap_workspace.py completed" in completed.stderr
 
 
 def test_capture_wrapper_dry_run_does_not_create_thread_file(tmp_path: Path) -> None:
@@ -88,11 +89,12 @@ def test_capture_wrapper_returns_actionable_error_for_missing_thread_title(tmp_p
         ]
     )
 
-    assert completed.returncode == 2
+    assert completed.returncode == 3
     payload = _parse_json_stdout(completed)
     assert payload["ok"] is False
     assert payload["error"]["code"] == "missing_thread_title"
     assert payload["error"]["hint"]
+    assert "ERROR [missing_thread_title]" in completed.stderr
 
 
 def test_sync_thread_state_wrapper_returns_structured_error_for_invalid_action_item_json(tmp_path: Path) -> None:
@@ -132,6 +134,7 @@ def test_sync_thread_state_wrapper_returns_structured_error_for_invalid_action_i
     payload = _parse_json_stdout(completed)
     assert payload["ok"] is False
     assert payload["error"]["code"] == "invalid_canonical_action_items_json"
+    assert "ERROR [invalid_canonical_action_items_json]" in completed.stderr
 
 
 def test_thread_status_wrapper_reports_current_thread_state(tmp_path: Path) -> None:
@@ -303,6 +306,69 @@ def test_apply_distillation_result_wrapper_rejects_invalid_update_json(tmp_path:
     payload = _parse_json_stdout(completed)
     assert payload["ok"] is False
     assert payload["error"]["code"] == "invalid_distillation_update_json"
+    assert "ERROR [invalid_distillation_update_json]" in completed.stderr
+
+
+def test_apply_distillation_result_wrapper_allows_missing_update_json(tmp_path: Path) -> None:
+    """Intent: distillation wrapper should accept omitted update-json to match the spec surface."""
+    _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
+    _run(
+        [
+            "skills/capturing-notes/scripts/capture_note.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--thread-slug",
+            "robot-debugging",
+            "--thread-title",
+            "Robot Debugging",
+            "--create-if-missing",
+            "--stdin-body",
+            "Billy investigated the connectivity issue.",
+        ]
+    )
+
+    completed = _run(
+        [
+            "skills/distilling-threads/scripts/apply_distillation_result.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--thread-slug",
+            "robot-debugging",
+            "--dry-run",
+        ]
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = _parse_json_stdout(completed)
+    assert payload["ok"] is True
+
+
+def test_resume_pending_wrapper_accepts_dry_run(tmp_path: Path) -> None:
+    """Intent: resume-pending wrapper should expose the spec-required dry-run flag."""
+    _run(["skills/shared/scripts/bootstrap_workspace.py", "--workspace-root", str(tmp_path)])
+
+    completed = _run(
+        [
+            "skills/distilling-threads/scripts/resume_pending.py",
+            "--workspace-root",
+            str(tmp_path),
+            "--all",
+            "--dry-run",
+        ]
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = _parse_json_stdout(completed)
+    assert payload["ok"] is True
+    assert payload["result"]["total"] == 0
+
+
+def test_wrapper_help_documents_exit_codes() -> None:
+    """Intent: wrapper help should document the shared exit code contract."""
+    completed = _run(["skills/shared/scripts/bootstrap_workspace.py", "--help"])
+
+    assert completed.returncode == 0
+    assert "Exit codes:" in completed.stdout
 
 
 def test_ingest_document_wrapper_creates_import_artifacts(tmp_path: Path) -> None:

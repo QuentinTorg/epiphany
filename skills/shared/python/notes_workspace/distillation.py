@@ -203,6 +203,7 @@ def resume_pending(
     thread_slug: str | None = None,
     import_slug: str | None = None,
     all_items: bool = False,
+    dry_run: bool = False,
 ) -> dict[str, object]:
     root = resolve_workspace_root(workspace_root)
     items: list[dict[str, str]] = []

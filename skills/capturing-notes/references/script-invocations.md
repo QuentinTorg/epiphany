@@ -9,6 +9,7 @@ Preferred cases:
 - existing known thread:
   - use `--thread-path`
 - start a new thread:
+  - use `--thread-slug`
   - use `--thread-title`
   - add `--create-if-missing`
 
@@ -43,6 +44,7 @@ python scripts/capture_note.py \
 
 ```bash
 python scripts/capture_note.py \
+  --thread-slug robot-debugging \
   --thread-title "Robot Debugging" \
   --create-if-missing \
   --stdin-body "Started a new debugging session for Rover 3."
@@ -52,7 +54,7 @@ Prefer `--thread-path` over `--thread-slug` when the exact thread file is alread
 
 Use `--thread-slug` only when the exact thread path is not already known.
 
-Use `--thread-title` with `--create-if-missing` only when intentionally starting a new thread.
+Use `--thread-slug`, `--thread-title`, and `--create-if-missing` together only when intentionally starting a new thread.
 
 ## `sync_thread_state.py`
 

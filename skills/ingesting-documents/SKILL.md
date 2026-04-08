@@ -55,5 +55,5 @@ Read [../shared/references/citation-rules.md](../shared/references/citation-rule
 - Prefer normalized text over the original binary for reading and citation.
 - The `## Source Summary` should be navigational, not exhaustive.
 - `sync_import_state.py` does not summarize the document for you. Edit the import record first, then sync.
-- `apply_import_update.py` is not required for the current workflow. Use direct edits plus `sync_import_state.py`.
+- The current workflow does not use a separate import-update wrapper. Use direct edits plus `sync_import_state.py`.
 - Only call wrappers in `scripts/` or `../shared/scripts/`. Do not treat shared Python modules as normal entrypoints.

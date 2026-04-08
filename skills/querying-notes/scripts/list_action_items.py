@@ -18,11 +18,20 @@ def _load_package_root() -> None:
 def main() -> int:
     _load_package_root()
     from notes_workspace.action_items import list_action_items
-    from notes_workspace.cli import emit, error_envelope, success_envelope
+    from notes_workspace.cli import (
+        EXIT_OK,
+        build_parser,
+        emit,
+        emit_error_diagnostic,
+        emit_success_diagnostic,
+        error_envelope,
+        exit_code_for_error,
+        success_envelope,
+    )
     from notes_workspace.errors import WorkspaceError
     from notes_workspace.paths import resolve_workspace_root
 
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = build_parser(description=__doc__)
     parser.add_argument("--kind", default="all")
     parser.add_argument("--status")
     parser.add_argument("--owner")
@@ -57,14 +66,16 @@ def main() -> int:
             offset=args.offset,
         )
     except WorkspaceError as exc:
+        emit_error_diagnostic(exc)
         emit(error_envelope(root, exc))
-        return 2
+        return exit_code_for_error(exc)
 
     if args.output_file:
         Path(args.output_file).write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
 
+    emit_success_diagnostic("list_action_items.py completed")
     emit(success_envelope(root, result=result))
-    return 0
+    return EXIT_OK
 
 
 if __name__ == "__main__":

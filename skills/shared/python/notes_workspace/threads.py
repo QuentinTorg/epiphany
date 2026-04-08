@@ -9,6 +9,7 @@ from .action_items import upsert_action_items
 from .documents import next_snippet_id, parse_thread_body, preview_from_text, render_snippet, render_thread_body
 from .errors import WorkspaceError
 from .frontmatter import load_markdown, write_markdown
+from .locks import acquire_lock
 from .paths import memory_root, parse_year_from_timestamp, relpath, resolve_workspace_root, thread_path_from_slug, thread_roots
 from .time_utils import current_timestamp
 from .views import rebuild_open_threads_view, rebuild_pending_distillation_view, rebuild_static_views, rebuild_workspace_readme
@@ -107,46 +108,52 @@ def capture_note(
                 )
             path = _thread_path_for_new(root, ts, thread_slug or "")
 
-    created = not path.exists()
-    if created and not create_if_missing:
-        raise WorkspaceError(
-            "thread_not_found",
-            f"Thread path {path} does not exist.",
-            "Use --create-if-missing to create a new thread.",
+    with acquire_lock(workspace_root=str(root), name=f"thread-{path.stem}"):
+        created = not path.exists()
+        if created and not create_if_missing:
+            raise WorkspaceError(
+                "thread_not_found",
+                f"Thread path {path} does not exist.",
+                "Use --create-if-missing to create a new thread.",
+            )
+
+        if created:
+            frontmatter = _new_thread_frontmatter(
+                slug=thread_slug or path.stem[11:],
+                title=thread_title or path.stem,
+                timestamp=ts,
+            )
+            sections = {
+                **_thread_placeholders(),
+                "snippets": "",
+            }
+        else:
+            frontmatter, sections = _load_thread(path)
+
+        snippet_id = next_snippet_id(sections["snippets"])
+        snippet = render_snippet(snippet_id=snippet_id, timestamp=ts, body=stdin_body, speaker=speaker)
+        sections["snippets"] = f"{sections['snippets'].rstrip()}\n\n{snippet}".strip() if sections["snippets"].strip() else snippet
+
+        frontmatter["last_updated_at"] = ts
+        frontmatter["last_captured_at"] = ts
+        frontmatter["distillation_state"] = "pending"
+        pending = list(frontmatter.get("pending_reason", []))
+        if "new-snippets" not in pending:
+            pending.append("new-snippets")
+        frontmatter["pending_reason"] = pending
+        frontmatter["preview"] = preview_from_text(
+            sections["summary"],
+            f"Open thread with {snippet_id} captured; summary pending.",
         )
 
-    if created:
-        frontmatter = _new_thread_frontmatter(slug=thread_slug or path.stem[11:], title=thread_title or path.stem, timestamp=ts)
-        sections = {
-            **_thread_placeholders(),
-            "snippets": "",
-        }
-    else:
-        frontmatter, sections = _load_thread(path)
-
-    snippet_id = next_snippet_id(sections["snippets"])
-    snippet = render_snippet(snippet_id=snippet_id, timestamp=ts, body=stdin_body, speaker=speaker)
-    sections["snippets"] = f"{sections['snippets'].rstrip()}\n\n{snippet}".strip() if sections["snippets"].strip() else snippet
-
-    frontmatter["last_updated_at"] = ts
-    frontmatter["last_captured_at"] = ts
-    frontmatter["distillation_state"] = "pending"
-    pending = list(frontmatter.get("pending_reason", []))
-    if "new-snippets" not in pending:
-        pending.append("new-snippets")
-    frontmatter["pending_reason"] = pending
-    frontmatter["preview"] = preview_from_text(
-        sections["summary"],
-        f"Open thread with {snippet_id} captured; summary pending.",
-    )
-
-    updated = [relpath(path, root)]
-    created_paths = updated.copy() if created else []
-    if not dry_run:
-        _write_thread(path, frontmatter, sections)
-        updated.extend(rebuild_open_threads_view(root))
-        updated.extend(rebuild_pending_distillation_view(root))
-        updated.extend(rebuild_workspace_readme(root))
+        updated = [relpath(path, root)]
+        created_paths = updated.copy() if created else []
+        if not dry_run:
+            _write_thread(path, frontmatter, sections)
+            with acquire_lock(workspace_root=str(root), name="views"):
+                updated.extend(rebuild_open_threads_view(root))
+                updated.extend(rebuild_pending_distillation_view(root))
+                updated.extend(rebuild_workspace_readme(root))
 
     return {
         "thread_path": relpath(path, root),
@@ -208,39 +215,42 @@ def sync_thread_state(
     """Refresh thread metadata and related views after direct agent edits."""
     root = resolve_workspace_root(workspace_root)
     path = Path(thread_path).resolve()
-    frontmatter, sections = _load_thread(path)
+    with acquire_lock(workspace_root=str(root), name=f"thread-{path.stem}"):
+        frontmatter, sections = _load_thread(path)
 
-    now = current_timestamp()
-    frontmatter["preview"] = preview_from_text(sections["summary"], "Open thread with captured notes.")
-    frontmatter["last_updated_at"] = now
-    frontmatter["light_distilled_at"] = now
-    frontmatter["distillation_state"] = "pending"
+        now = current_timestamp()
+        frontmatter["preview"] = preview_from_text(sections["summary"], "Open thread with captured notes.")
+        frontmatter["last_updated_at"] = now
+        frontmatter["light_distilled_at"] = now
+        frontmatter["distillation_state"] = "pending"
 
-    pending = list(frontmatter.get("pending_reason", []))
-    if "new-snippets" not in pending:
-        pending.append("new-snippets")
-    frontmatter["pending_reason"] = pending
+        pending = list(frontmatter.get("pending_reason", []))
+        if "new-snippets" not in pending:
+            pending.append("new-snippets")
+        frontmatter["pending_reason"] = pending
 
-    action_item_paths_updated: list[str] = []
-    if canonical_action_items:
-        action_item_result = upsert_action_items(
-            workspace_root=str(root),
-            items=canonical_action_items,
-            source_thread_ref=frontmatter["id"],
-            dry_run=dry_run,
-        )
-        frontmatter["action_item_refs"] = list(action_item_result["action_item_refs"])
-        action_item_paths_updated.extend(action_item_result["paths_updated"])
-
-    updated = [relpath(path, root)]
-    if not dry_run:
-        _write_thread(path, frontmatter, sections)
+        action_item_paths_updated: list[str] = []
         if canonical_action_items:
-            updated.extend(rebuild_static_views(root))
-        updated.extend(rebuild_open_threads_view(root))
-        updated.extend(rebuild_pending_distillation_view(root))
-        updated.extend(rebuild_workspace_readme(root))
-        updated.extend(action_item_paths_updated)
+            with acquire_lock(workspace_root=str(root), name="action-items"):
+                action_item_result = upsert_action_items(
+                    workspace_root=str(root),
+                    items=canonical_action_items,
+                    source_thread_ref=frontmatter["id"],
+                    dry_run=dry_run,
+                )
+            frontmatter["action_item_refs"] = list(action_item_result["action_item_refs"])
+            action_item_paths_updated.extend(action_item_result["paths_updated"])
+
+        updated = [relpath(path, root)]
+        if not dry_run:
+            _write_thread(path, frontmatter, sections)
+            with acquire_lock(workspace_root=str(root), name="views"):
+                if canonical_action_items:
+                    updated.extend(rebuild_static_views(root))
+                updated.extend(rebuild_open_threads_view(root))
+                updated.extend(rebuild_pending_distillation_view(root))
+                updated.extend(rebuild_workspace_readme(root))
+            updated.extend(action_item_paths_updated)
 
     return {
         "thread_path": relpath(path, root),

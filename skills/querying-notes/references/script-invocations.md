@@ -55,8 +55,9 @@ Common useful filters:
 
 - `--kind`
 - `--status`
-- `--owner-topic`
-- `--linked-topic`
+- `--owner`
+- `--topic`
+- `--entity`
 - `--date-from`
 - `--date-to`
 - `--source-thread`
@@ -71,6 +72,12 @@ Use only when needed:
 - `--workspace-root`
 
 Prefer coarse filtering first, then open the returned records yourself.
+
+Use `--owner` when the question is about the person who owns the work.
+
+Use `--topic` when the question is scoped to one canonical topic.
+
+Use `--entity` when the user names a person, project, or other entity but the exact canonical topic linkage may not be known yet.
 
 Use `--include-closed` only when historical done or resolved items are relevant to the question.
 

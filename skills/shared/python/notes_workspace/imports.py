@@ -19,6 +19,7 @@ from .documents import (
 )
 from .errors import WorkspaceError
 from .frontmatter import load_markdown, write_markdown
+from .locks import acquire_lock
 from .paths import imports_root, relpath, resolve_workspace_root
 from .time_utils import current_timestamp
 from .views import rebuild_pending_distillation_view, rebuild_static_views, rebuild_workspace_readme
@@ -224,14 +225,16 @@ def ingest_document(
 
     paths_created = [relpath(paths["source"], root), relpath(paths["text"], root), relpath(paths["record"], root)]
     paths_updated = list(paths_created)
-    if not dry_run:
-        paths["source"].parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, paths["source"])
-        write_markdown(paths["text"], text_frontmatter, text_body)
-        write_markdown(paths["record"], record_frontmatter, record_body)
-        paths_updated.extend(rebuild_static_views(root))
-        paths_updated.extend(rebuild_pending_distillation_view(root))
-        paths_updated.extend(rebuild_workspace_readme(root))
+    with acquire_lock(workspace_root=str(root), name=f"import-{paths['record'].stem}"):
+        if not dry_run:
+            paths["source"].parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, paths["source"])
+            write_markdown(paths["text"], text_frontmatter, text_body)
+            write_markdown(paths["record"], record_frontmatter, record_body)
+            with acquire_lock(workspace_root=str(root), name="views"):
+                paths_updated.extend(rebuild_static_views(root))
+                paths_updated.extend(rebuild_pending_distillation_view(root))
+                paths_updated.extend(rebuild_workspace_readme(root))
 
     return {
         "import_record_path": relpath(paths["record"], root),
@@ -255,38 +258,41 @@ def sync_import_state(
 
     root = resolve_workspace_root(workspace_root)
     path = Path(import_record_path).resolve()
-    frontmatter, body = load_markdown(path)
-    parsed = parse_import_record_body(body)
-    now = current_timestamp()
+    with acquire_lock(workspace_root=str(root), name=f"import-{path.stem}"):
+        frontmatter, body = load_markdown(path)
+        parsed = parse_import_record_body(body)
+        now = current_timestamp()
 
-    frontmatter["preview"] = preview_from_text(parsed["source_summary"], "Imported source with captured text.")
-    frontmatter["updated_at"] = now
-    frontmatter["light_distilled_at"] = now
-    frontmatter["distillation_state"] = "pending"
-    pending = list(frontmatter.get("pending_reason", []))
-    if "new-import" not in pending:
-        pending.append("new-import")
-    frontmatter["pending_reason"] = pending
+        frontmatter["preview"] = preview_from_text(parsed["source_summary"], "Imported source with captured text.")
+        frontmatter["updated_at"] = now
+        frontmatter["light_distilled_at"] = now
+        frontmatter["distillation_state"] = "pending"
+        pending = list(frontmatter.get("pending_reason", []))
+        if "new-import" not in pending:
+            pending.append("new-import")
+        frontmatter["pending_reason"] = pending
 
-    action_item_paths_updated: list[str] = []
-    if canonical_action_items:
-        action_item_result = upsert_action_items(
-            workspace_root=str(root),
-            items=canonical_action_items,
-            source_import_ref=frontmatter["id"],
-            dry_run=dry_run,
-        )
-        frontmatter["action_item_refs"] = list(action_item_result["action_item_refs"])
-        action_item_paths_updated.extend(action_item_result["paths_updated"])
-
-    updated = [relpath(path, root)]
-    if not dry_run:
-        write_markdown(path, frontmatter, body)
+        action_item_paths_updated: list[str] = []
         if canonical_action_items:
-            updated.extend(rebuild_static_views(root))
-        updated.extend(rebuild_pending_distillation_view(root))
-        updated.extend(rebuild_workspace_readme(root))
-        updated.extend(action_item_paths_updated)
+            with acquire_lock(workspace_root=str(root), name="action-items"):
+                action_item_result = upsert_action_items(
+                    workspace_root=str(root),
+                    items=canonical_action_items,
+                    source_import_ref=frontmatter["id"],
+                    dry_run=dry_run,
+                )
+            frontmatter["action_item_refs"] = list(action_item_result["action_item_refs"])
+            action_item_paths_updated.extend(action_item_result["paths_updated"])
+
+        updated = [relpath(path, root)]
+        if not dry_run:
+            write_markdown(path, frontmatter, body)
+            with acquire_lock(workspace_root=str(root), name="views"):
+                if canonical_action_items:
+                    updated.extend(rebuild_static_views(root))
+                updated.extend(rebuild_pending_distillation_view(root))
+                updated.extend(rebuild_workspace_readme(root))
+            updated.extend(action_item_paths_updated)
 
     return {
         "import_record_path": relpath(path, root),

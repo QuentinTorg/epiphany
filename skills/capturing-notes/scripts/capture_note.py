@@ -16,12 +16,21 @@ def _load_package_root() -> None:
 
 def main() -> int:
     _load_package_root()
-    from notes_workspace.cli import emit, error_envelope, success_envelope
+    from notes_workspace.cli import (
+        EXIT_OK,
+        build_parser,
+        emit,
+        emit_error_diagnostic,
+        emit_success_diagnostic,
+        error_envelope,
+        exit_code_for_error,
+        success_envelope,
+    )
     from notes_workspace.errors import WorkspaceError
     from notes_workspace.paths import resolve_workspace_root
     from notes_workspace.threads import capture_note
 
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = build_parser(description=__doc__)
     parser.add_argument("--thread-path")
     parser.add_argument("--thread-slug")
     parser.add_argument("--thread-title")
@@ -47,9 +56,11 @@ def main() -> int:
             dry_run=args.dry_run,
         )
     except WorkspaceError as exc:
+        emit_error_diagnostic(exc)
         emit(error_envelope(root, exc))
-        return 2
+        return exit_code_for_error(exc)
 
+    emit_success_diagnostic("capture_note.py completed")
     emit(
         success_envelope(
             root,
@@ -58,7 +69,7 @@ def main() -> int:
             paths_updated=result["paths_updated"],
         )
     )
-    return 0
+    return EXIT_OK
 
 
 if __name__ == "__main__":

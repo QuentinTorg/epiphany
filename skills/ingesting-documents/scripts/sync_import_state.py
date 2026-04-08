@@ -28,12 +28,22 @@ def _load_action_items(raw: str | None) -> list[dict[str, object]] | None:
 
 def main() -> int:
     _load_package_root()
-    from notes_workspace.cli import emit, error_envelope, success_envelope
+    from notes_workspace.cli import (
+        EXIT_INVALID_ARGUMENTS,
+        EXIT_OK,
+        build_parser,
+        emit,
+        emit_error_diagnostic,
+        emit_success_diagnostic,
+        error_envelope,
+        exit_code_for_error,
+        success_envelope,
+    )
     from notes_workspace.errors import WorkspaceError
     from notes_workspace.imports import sync_import_state
     from notes_workspace.paths import resolve_workspace_root
 
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = build_parser(description=__doc__)
     parser.add_argument("--import-record-path", required=True)
     parser.add_argument("--canonical-action-items-json")
     parser.add_argument("--workspace-root")
@@ -55,12 +65,15 @@ def main() -> int:
             str(exc),
             "Pass inline JSON or @path/to/file.json containing a JSON list.",
         )
+        emit_error_diagnostic(error)
         emit(error_envelope(root, error))
-        return 2
+        return EXIT_INVALID_ARGUMENTS
     except WorkspaceError as exc:
+        emit_error_diagnostic(exc)
         emit(error_envelope(root, exc))
-        return 2
+        return exit_code_for_error(exc)
 
+    emit_success_diagnostic("sync_import_state.py completed")
     emit(
         success_envelope(
             root,
@@ -68,7 +81,7 @@ def main() -> int:
             paths_updated=result["paths_updated"],
         )
     )
-    return 0
+    return EXIT_OK
 
 
 if __name__ == "__main__":

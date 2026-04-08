@@ -26,17 +26,27 @@ def _load_update_json(raw: str) -> dict[str, object]:
 
 def main() -> int:
     _load_package_root()
-    from notes_workspace.cli import emit, error_envelope, success_envelope
+    from notes_workspace.cli import (
+        EXIT_INVALID_ARGUMENTS,
+        EXIT_OK,
+        build_parser,
+        emit,
+        emit_error_diagnostic,
+        emit_success_diagnostic,
+        error_envelope,
+        exit_code_for_error,
+        success_envelope,
+    )
     from notes_workspace.distillation import apply_distillation_result
     from notes_workspace.errors import WorkspaceError
     from notes_workspace.paths import resolve_workspace_root
 
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = build_parser(description=__doc__)
     parser.add_argument("--thread-path")
     parser.add_argument("--thread-slug")
     parser.add_argument("--import-record-path")
     parser.add_argument("--import-slug")
-    parser.add_argument("--update-json", required=True)
+    parser.add_argument("--update-json")
     parser.add_argument("--close-thread", action="store_true")
     parser.add_argument("--rebuild-views", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -45,7 +55,7 @@ def main() -> int:
 
     root = resolve_workspace_root(args.workspace_root)
     try:
-        update = _load_update_json(args.update_json)
+        update = _load_update_json(args.update_json) if args.update_json else {}
         result = apply_distillation_result(
             update=update,
             thread_path=args.thread_path,
@@ -63,12 +73,15 @@ def main() -> int:
             str(exc),
             "Pass inline JSON or @path/to/file.json containing a JSON object.",
         )
+        emit_error_diagnostic(error)
         emit(error_envelope(root, error))
-        return 2
+        return EXIT_INVALID_ARGUMENTS
     except WorkspaceError as exc:
+        emit_error_diagnostic(exc)
         emit(error_envelope(root, exc))
-        return 2
+        return exit_code_for_error(exc)
 
+    emit_success_diagnostic("apply_distillation_result.py completed")
     emit(
         success_envelope(
             root,
@@ -77,7 +90,7 @@ def main() -> int:
             paths_updated=result["paths_updated"],
         )
     )
-    return 0
+    return EXIT_OK
 
 
 if __name__ == "__main__":
