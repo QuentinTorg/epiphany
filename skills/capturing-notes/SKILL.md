@@ -10,15 +10,19 @@ metadata:
 
 Capture raw note evidence first. Keep semantic edits agent-authored and use scripts only for structural state.
 
-Read `../shared/references/agent-script-boundary.md` before using this skill.
-Read `references/thread-selection.md` when you need to decide whether to append to an existing thread or start a new one.
-Read `../shared/references/citation-rules.md` if you are writing or revising thread-local summaries.
+Read [../shared/references/agent-script-boundary.md](../shared/references/agent-script-boundary.md) before using this skill.
+Read [../shared/references/workspace-model.md](../shared/references/workspace-model.md) when you need to decide where captured information belongs.
+Read [../shared/references/action-item-policy.md](../shared/references/action-item-policy.md) when notes imply tasks or unresolved questions.
+Read [references/thread-selection.md](references/thread-selection.md) when you need to decide whether to append to an existing thread or start a new one.
+Read [references/lightweight-distillation.md](references/lightweight-distillation.md) before performing the thread-local synthesis update.
+Read [references/capture-edge-cases.md](references/capture-edge-cases.md) when routing or task extraction is ambiguous.
+Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) if you are writing or revising thread-local summaries.
 
 ## Available scripts
 
-- `scripts/capture_note.py` — create or append to a thread and add a raw snippet
-- `scripts/sync_thread_state.py` — refresh thread metadata and mechanical views after direct thread edits
-- `scripts/thread_status.py` — inspect current thread state
+- [scripts/capture_note.py](scripts/capture_note.py) — create or append to a thread and add a raw snippet
+- [scripts/sync_thread_state.py](scripts/sync_thread_state.py) — refresh thread metadata and mechanical views after direct thread edits
+- [scripts/thread_status.py](scripts/thread_status.py) — inspect current thread state
 
 ## Checklist
 
@@ -31,11 +35,12 @@ Read `../shared/references/citation-rules.md` if you are writing or revising thr
 ## Workflow
 
 1. Start from `memory/README.md` and `memory/views/open-threads.md`.
-2. Decide whether to append to an existing thread or create a new one.
-3. Run `python scripts/capture_note.py ...` to append the raw note.
-4. Edit the thread’s `## Current Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes` directly.
-5. If the note introduced explicit canonical action items, prepare the structured payload for them.
-6. Run `python scripts/sync_thread_state.py ...` to refresh preview, pending state, and views.
+2. If the workspace is not initialized yet, run `python ../shared/scripts/bootstrap_workspace.py ...` first.
+3. Decide whether to append to an existing thread or create a new one.
+4. Run `python scripts/capture_note.py ...` to append the raw note.
+5. Edit the thread’s `## Current Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes` directly.
+6. If the note introduced explicit canonical action items, prepare the structured payload for them.
+7. Run `python scripts/sync_thread_state.py ...` to refresh preview, pending state, and views.
 
 ## Validation Loop
 
@@ -50,3 +55,4 @@ Read `../shared/references/citation-rules.md` if you are writing or revising thr
 - `sync_thread_state.py` does not decide what changed semantically. Edit the thread prose first, then sync.
 - Stale-open routing is based on `last_captured_at`, not on later metadata touches.
 - Do not close a thread from this skill. Use `distilling-threads` when the user asks to reconcile or close.
+- Only call wrappers in `scripts/` or `../shared/scripts/`. Do not treat shared Python modules as normal entrypoints.

@@ -1507,13 +1507,20 @@ Client-specific metadata directories such as `agents/` are optional. If present,
 
 The shared references directory must contain:
 
+- `agent-script-boundary.md`
+- `workspace-navigation.md`
+- `citation-rules.md`
 - `workspace-model.md`
 - `filing-rules.md`
-- `citation-policy.md`
 - `action-item-policy.md`
 - `recovery-policy.md`
 
-These documents define reusable conventions rather than workflow entrypoints.
+`agent-script-boundary.md` must carry both:
+
+- the semantic-vs-mechanical boundary,
+- the deployed agent-facing script surface and routing guidance.
+
+These documents define reusable conventions and shared workflow-entrypoint rules for all user-facing skills.
 
 ### Required skill-local references
 
@@ -1524,7 +1531,7 @@ Each user-facing skill must also define focused local references so `SKILL.md` c
   - `lightweight-distillation.md`
   - `capture-edge-cases.md`
 - `querying-notes/references/`
-  - `retrieval-workflow.md`
+  - `retrieval-checklist.md`
   - `answer-style.md`
   - `query-escalation.md`
 - `distilling-threads/references/`
@@ -1532,6 +1539,7 @@ Each user-facing skill must also define focused local references so `SKILL.md` c
   - `recovery-workflow.md`
   - `close-thread-git-prompt.md`
 - `ingesting-documents/references/`
+  - `ingestion-checklist.md`
   - `import-conversion-policy.md`
   - `large-document-reading.md`
   - `import-distillation-policy.md`
