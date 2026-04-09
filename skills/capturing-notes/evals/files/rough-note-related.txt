@@ -1,1 +1,0 @@
-Billy retested Rover 3 and still saw CAN bus dropouts.
