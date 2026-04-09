@@ -45,3 +45,5 @@ This skill guides you through the process of reading freshly ingested raw materi
 - **Do NOT delete the parsed files.** Distillation is about copying the *meaning* into Topics. The original parsed file must remain as evidence.
 - **Conflict Handling:** If the pending file contradicts existing information in a Topic, do NOT just overwrite the old info. Instead, record both perspectives and create an Open Question (`- [ ] Resolve conflict between...`) in the Topic file, citing both sources.
 - **Relative Pathing:** Be extremely careful with relative paths. A Topic in `knowledge/topics/topic.md` linking to a log in `knowledge/parsed/logs/log.md` must use `../parsed/logs/log.md`.
+- **Pending State:** Keep the source pending if contradictions, missing information, or unresolved ambiguity still block completion. Do not mark a source complete only because structural updates succeeded.
+- **Git Commits:** If the workspace is a Git repository, after successful distillation, offer to make a commit for the user. Show the exact `git commit` command but wait for explicit approval.

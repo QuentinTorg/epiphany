@@ -45,3 +45,4 @@ This skill guides you through the process of searching the Knowledge Database to
 - **Progressive Disclosure vs. Search:** While text search is allowed and encouraged for finding specific details or casting a wide net, remember that Topics are designed to hold the distilled, current understanding. Prefer reading a summarized Topic over piecing together raw logs if the Topic exists.
 - **Time/Entity Questions:** For queries like "What did Billy work on last week?", checking `knowledge/topics/billy.md` is a good start, but a text search for "Billy" inside recent `knowledge/parsed/logs/` might also be necessary.
 - **Contradictions:** If you find contradictory information, present both sides in your answer, citing both sources. Do not pick a "winner" unless a more recent source explicitly resolves the conflict.
+- **Answer Style:** Prefer concise answers over long narrative walkthroughs. Escalate from high-level topics into deeper evidence only when needed.

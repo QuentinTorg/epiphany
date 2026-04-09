@@ -13,6 +13,7 @@ This skill guides you through ingesting external files or web URLs into the Know
 ## Contract & Conventions
 
 - **Database Location:** The Knowledge Database defaults to `knowledge/` in the current workspace. If you cannot find it, ask the user for permission to initialize it.
+- **Supported Formats:** Supported document inputs are `.md`, `.txt`, `.docx`, and `.pdf`.
 - **Raw Inputs:** Exact copies of documents or raw HTML from URLs MUST be saved to `knowledge/raw/docs/` or `knowledge/raw/urls/` respectively.
 - **Parsed Text:** Extracted, readable Markdown MUST be saved to `knowledge/parsed/docs/` or `knowledge/parsed/urls/`.
 - **Pending State:** Parsed files MUST be marked with `**Status:** Pending Distillation` at the top.
@@ -47,4 +48,6 @@ This skill guides you through ingesting external files or web URLs into the Know
 
 - **Do not distill yet:** Do not attempt to summarize or extract topics during this step. Your goal is simply to convert the source into a readable Markdown file that preserves the original information.
 - **Handling Images/Binary Data:** If the source document contains images that you cannot extract, simply note `[Image omitted]` in the parsed Markdown text.
+- **Relative Linking:** Always use relative links (e.g., `../parsed/docs/file.md`) when updating the `sources-index.md` to ensure the Knowledge Database is portable.
+nnot extract, simply note `[Image omitted]` in the parsed Markdown text.
 - **Relative Linking:** Always use relative links (e.g., `../parsed/docs/file.md`) when updating the `sources-index.md` to ensure the Knowledge Database is portable.

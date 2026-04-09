@@ -43,4 +43,5 @@ This skill guides you through capturing raw user notes and appending them to a c
 ## Gotchas
 
 - **Do not summarize during capture:** Your job right now is purely to capture the raw evidence. Do not attempt to rephrase, summarize, or distill the note yet. Preserve the exact fidelity of the user's input.
+- **Capture first, clarify later:** Never block raw capture on perfect categorization. Capture the raw input first, then clarify if needed.
 - **Missing directories:** Use file creation tools that automatically create parent directories if `knowledge/parsed/logs/` does not exist yet (assuming the user approved initialization).
