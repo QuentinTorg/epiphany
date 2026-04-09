@@ -1,54 +1,47 @@
 ---
-name: querying-notes
-description: Use this skill when the user asks questions about stored notes, action items, people, projects, systems, or prior decisions in the workspace. It teaches progressive-disclosure retrieval and uses coarse query tools to narrow candidate files before the agent synthesizes the answer.
-compatibility: Requires Python 3 and a readable note-taking workspace with generated views and canonical records.
-metadata:
-  owner: epiphany
+name: querying-database
+description: >
+  Queries the Knowledge Database for information across topics, documents, and logs.
+  Use this skill when the user asks you a direct question about past work, decisions,
+  people, projects, tasks, or any other knowledge stored in the database.
 ---
 
-# Querying Notes
+# Querying the Knowledge Database
 
-Use the tools here to narrow the search space. Do the actual reasoning yourself.
+This skill guides you through the process of searching the Knowledge Database to answer a user's question accurately, concisely, and with proper citations. Queries are meant to be interactive—you do not need to find a perfect answer immediately if the request is ambiguous.
 
-Read [../shared/references/workspace-navigation.md](../shared/references/workspace-navigation.md) before starting.
-Read [../shared/references/recovery-policy.md](../shared/references/recovery-policy.md) when pending distillation may affect answer completeness.
-Read [references/retrieval-checklist.md](references/retrieval-checklist.md) for the exact retrieval order.
-Read [references/query-escalation.md](references/query-escalation.md) when deciding how far to drill into evidence.
-Read [references/answer-style.md](references/answer-style.md) before drafting the final answer.
-Read [references/script-invocations.md](references/script-invocations.md) before running query scripts if you need argument guidance.
-Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) before drafting the final answer.
+## Contract & Conventions
 
-## Available scripts
-
-- [scripts/query_memory.py](scripts/query_memory.py) — coarse retrieval across views, threads, topics, imports, and action items
-- [scripts/list_action_items.py](scripts/list_action_items.py) — structured filtering over canonical tasks and questions
-
-## Checklist
-
-- start from `memory/README.md`
-- narrow with views and query tools before opening many files
-- synthesize the answer yourself
-- cite raw evidence
-- mention pending-distillation uncertainty when relevant
+- **Database Location:** The Knowledge Database defaults to `knowledge/` in the current workspace. If you cannot find it, ask the user for its location.
+- **Entrypoints:** You should generally begin your search at the Indexes (`knowledge/indexes/topics-index.md` or `knowledge/indexes/sources-index.md`).
+- **Progressive Disclosure:** The primary intent of this database is progressive disclosure. Try to use the Indexes to find relevant Topics, read those Topics, and follow relative links (e.g., `[Source](../parsed/logs/2026-04-09.md)`) only if you need deeper context. 
+- **Text Search (Grep):** Full-text search is a valuable tool in your arsenal. Use your best judgment: if index searches do not provide relevant leads, or if you need to find specific dates, names, or mentions across different topics and raw materials, use text search for breadth.
+- **Accuracy & Hallucinations:** Accuracy is key. You MUST NOT hallucinate facts. Information should be based strictly on a raw source of truth.
+- **Citations:** Every factual claim in your answer MUST include a citation pointing to the file that provided the information. 
+- **Assumptions & Logical Leaps:** If you draw logical conclusions from the information provided, you MUST explicitly label them as such (e.g., "Assumption:" or "Logical Conclusion:") and justify how you reached them based on the cited sources.
+- **Outside Information:** If you need to pull new information from outside resources (e.g., web search, general knowledge) to answer the query, you MUST prompt the user to ask if that new information should be added to the Knowledge Database instead of just answering and discarding it.
+- **Interactivity:** If a query is unclear, confusing, or yields no initial results, ask the user for clarification. Requesting more details to help narrow down the search is highly encouraged.
 
 ## Workflow
 
-1. Start from `memory/README.md`.
-2. If the workspace is not initialized yet, stop and bootstrap it with `python ../shared/scripts/bootstrap_workspace.py ...` before querying.
-3. Run `python scripts/query_memory.py --query ...` when the question spans multiple files or needs structured narrowing.
-4. Open the most likely candidates returned by the script.
-5. Use `python scripts/list_action_items.py ...` when the query is clearly about tasks, blockers, or open questions.
-6. Synthesize the answer yourself and cite raw evidence.
-
-## Validation Loop
-
-- Check whether `query_memory.py` returned pending-distillation warnings.
-- If warnings exist, reflect that uncertainty in the answer.
-- Confirm the final answer cites thread snippets or normalized import text chunks, not only generated summaries.
+1. **Locate the Database:** Identify the location of the `knowledge/` directory.
+2. **Review Indexes (Primary Path):**
+   - Read `knowledge/indexes/topics-index.md` to identify Topic files likely to contain the answer.
+   - Read `knowledge/indexes/sources-index.md` if the question asks about a specific document or URL.
+3. **Broad Text Search (Fallback/Breadth Path):**
+   - If Indexes don't reveal clear leads, or you are looking for specific keywords/names, perform a text search across `knowledge/topics/` or `knowledge/parsed/`.
+4. **Explore & Synthesize:**
+   - Open the most relevant Topic files or search results.
+   - If a Topic summary is too brief, follow its relative links back to the original `knowledge/parsed/` files for deeper context.
+   - If you cannot find the answer, or if the request is ambiguous, stop and ask the user for clarification to help narrow the search.
+5. **Report:**
+   - Combine the findings into a concise, direct answer based strictly on the source of truth.
+   - Attach citations to your factual statements.
+   - Explicitly label and justify any logical conclusions or assumptions.
+   - If outside knowledge was used, ask the user if it should be added to the database.
 
 ## Gotchas
 
-- `query_memory.py` is a narrowing tool, not an answer engine.
-- Start broad with views and indexes before drilling into thread snippets or normalized import text.
-- Do not mutate the workspace from this skill.
-- Only call wrappers in `scripts/` or `../shared/scripts/`. Do not treat shared Python modules as normal entrypoints.
+- **Progressive Disclosure vs. Search:** While text search is allowed and encouraged for finding specific details or casting a wide net, remember that Topics are designed to hold the distilled, current understanding. Prefer reading a summarized Topic over piecing together raw logs if the Topic exists.
+- **Time/Entity Questions:** For queries like "What did Billy work on last week?", checking `knowledge/topics/billy.md` is a good start, but a text search for "Billy" inside recent `knowledge/parsed/logs/` might also be necessary.
+- **Contradictions:** If you find contradictory information, present both sides in your answer, citing both sources. Do not pick a "winner" unless a more recent source explicitly resolves the conflict.

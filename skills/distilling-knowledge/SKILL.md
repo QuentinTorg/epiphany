@@ -1,63 +1,47 @@
 ---
-name: distilling-threads
-description: Use this skill when the user asks to reconcile notes, bubble thread or import knowledge into canonical topics and action items, recover pending distillation work, or explicitly close a thread. It applies agent-authored deep-distillation results with the distillation scripts and refreshes canonical views.
-compatibility: Requires Python 3, a writable workspace root, and the Epiphany workspace layout.
-metadata:
-  owner: epiphany
+name: distilling-knowledge
+description: >
+  Reads "pending" parsed logs and documents, extracts relevant facts and action items, and updates
+  the living Topic files and Indexes. Use this skill when the user asks you to distill, summarize,
+  organize, or review pending knowledge in the database.
 ---
 
-# Distilling Threads
+# Distilling Knowledge
 
-This skill is for deep reconciliation, not lightweight capture updates.
+This skill guides you through the process of reading freshly ingested raw material (logs, documents, URLs) that are marked as "Pending Distillation," and bubbling that information up into durable, cross-referenced Topic files.
 
-Read [../shared/references/agent-script-boundary.md](../shared/references/agent-script-boundary.md) before using this skill.
-Read [../shared/references/workspace-model.md](../shared/references/workspace-model.md) when deciding where reconciled information belongs.
-Read [../shared/references/action-item-policy.md](../shared/references/action-item-policy.md) when updating canonical tasks or unresolved questions.
-Read [../shared/references/recovery-policy.md](../shared/references/recovery-policy.md) when resuming interrupted work.
-Read [references/deep-distillation-checklist.md](references/deep-distillation-checklist.md) before preparing a distillation payload.
-Read [references/recovery-workflow.md](references/recovery-workflow.md) when the user asks to recover pending work.
-Read [references/close-thread-git-prompt.md](references/close-thread-git-prompt.md) during an explicit close-thread workflow.
-Read [references/script-invocations.md](references/script-invocations.md) before running distillation scripts if you need argument guidance.
-Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) when writing topic or action-item prose.
+## Contract & Conventions
 
-## Available scripts
-
-- [scripts/apply_distillation_result.py](scripts/apply_distillation_result.py) — apply an already-authored deep-distillation result to a thread or import
-- [scripts/resume_pending.py](scripts/resume_pending.py) — list pending distillation work for recovery
-
-## Checklist
-
-- read the source plus linked canonical records
-- decide the semantic changes yourself
-- prepare the distillation payload
-- apply it structurally with the wrapper
-- verify state transitions and rebuilt views
-- keep the source pending if reconciliation is incomplete
+- **Database Location:** The Knowledge Database defaults to `knowledge/` in the current workspace. If you cannot find it, ask the user for the location.
+- **Pending Files:** A file in `knowledge/parsed/` (logs, docs, urls) is pending distillation if it contains the text `**Status:** Pending Distillation` at or near the top.
+- **Topics (`knowledge/topics/`):** Living summaries of specific subjects (e.g., people, projects, systems, decisions). They are standard Markdown files.
+- **Indexes (`knowledge/indexes/`):** Markdown files acting as a table of contents for Topics and Sources. You must update `topics-index.md` whenever you create a new Topic.
+- **Action State:** Tasks and Open Questions must be extracted as simple Markdown checklists (`- [ ]`) embedded inside the relevant Topic files under an `## Action Items` or `## Open Questions` heading.
+- **Relative Linking:** Whenever you reference a source document or another topic, you MUST use an explicit relative Markdown link (e.g., `[Design Doc](../parsed/docs/design-doc.md)`).
+- **Clear Pending State:** Once a file has been completely distilled into the relevant Topics, you MUST remove the `**Status:** Pending Distillation` line from it, replacing it with `**Status:** Distilled on YYYY-MM-DD`.
 
 ## Workflow
 
-1. If the workspace is not initialized yet, run `python ../shared/scripts/bootstrap_workspace.py ...` first.
-2. Use `python scripts/resume_pending.py --all` when the user asks for recovery or wants to review pending work.
-3. Read the source thread or import record plus directly linked topics and action items.
-4. Decide the semantic updates yourself:
-   - which topics change or should be created
-   - which action items change or should be created
-   - whether the source can be marked complete or must remain pending
-5. Prepare the `--update-json` payload.
-6. Run `python scripts/apply_distillation_result.py ...`.
-7. If the user explicitly asked to close a thread and distillation succeeded, follow the Git-aware close-thread prompt behavior.
-
-## Validation Loop
-
-- Confirm the source record’s pending/complete state is correct after applying.
-- Open the affected topic and action-item documents and verify the expected prose landed there.
-- Confirm the relevant topic indexes and generated views were rebuilt.
-- If contradictions remain unresolved, keep the source pending and record the reason.
+1. **Locate Pending Files:**
+   - Search the `knowledge/parsed/` directory (including `logs`, `docs`, `urls`) for any files containing `**Status:** Pending Distillation`.
+2. **Review & Extract:**
+   - Read the contents of each pending file.
+   - Identify the core entities, decisions, topics, tasks, and open questions.
+3. **Update or Create Topics:**
+   - For each major subject identified, locate its corresponding Topic file in `knowledge/topics/` (e.g., `project-alpha.md`).
+   - If the Topic file doesn't exist, create it.
+   - Summarize the new findings and append/integrate them into the Topic file.
+   - **Crucial:** Cite your sources! When adding facts to a Topic, link back to the parsed file that provided the fact (e.g., `Decided to use Postgres ([Source](../parsed/logs/2026-04-09.md))`).
+   - If new tasks or open questions are found, add them as `- [ ]` checklist items within the Topic.
+4. **Update Indexes:**
+   - If you created any *new* Topic files, you MUST add a relative link to them in `knowledge/indexes/topics-index.md`. Create the index file if it doesn't exist.
+5. **Mark as Distilled:**
+   - After successfully distilling a parsed file, edit that file to change `**Status:** Pending Distillation` to `**Status:** Distilled on YYYY-MM-DD` (using the current date).
+6. **Confirm:**
+   - Summarize to the user which files were distilled and which Topics were updated.
 
 ## Gotchas
 
-- `apply_distillation_result.py` does not invent topic summaries or action-item content. You must decide those first.
-- Deep distillation may run without closing a thread.
-- Do not mark a source complete if unresolved contradictions still block the workspace’s current understanding.
-- Only show the Git commit prompt during an explicit close-thread workflow in a Git workspace.
-- Only call wrappers in `scripts/` or `../shared/scripts/`. Do not treat shared Python modules as normal entrypoints.
+- **Do NOT delete the parsed files.** Distillation is about copying the *meaning* into Topics. The original parsed file must remain as evidence.
+- **Conflict Handling:** If the pending file contradicts existing information in a Topic, do NOT just overwrite the old info. Instead, record both perspectives and create an Open Question (`- [ ] Resolve conflict between...`) in the Topic file, citing both sources.
+- **Relative Pathing:** Be extremely careful with relative paths. A Topic in `knowledge/topics/topic.md` linking to a log in `knowledge/parsed/logs/log.md` must use `../parsed/logs/log.md`.

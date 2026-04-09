@@ -1,59 +1,50 @@
 ---
 name: ingesting-documents
-description: Use this skill when the user wants to add an external document such as markdown, text, docx, or pdf into the workspace as evidence. It stages the source file, creates normalized text and an import record, then uses direct import-record edits plus structural follow-up for later deep distillation.
-compatibility: Requires Python 3, a writable workspace root, and local PDF extraction support for pdf ingestion.
-metadata:
-  owner: epiphany
+description: >
+  Ingests documents (e.g., PDF, DOCX, TXT) and web URLs by copying them to a raw inputs directory and
+  extracting them into parsed Markdown text. Use this skill when the user asks you to import, read,
+  or ingest a file or a web link into the Knowledge Database.
 ---
 
-# Ingesting Documents
+# Ingesting Documents & URLs
 
-Use this skill to turn an external document into durable workspace evidence without loading the full source into context unnecessarily.
+This skill guides you through ingesting external files or web URLs into the Knowledge Database. The process preserves the raw original evidence while extracting a parsed Markdown version that is ready for distillation.
 
-Read [../shared/references/agent-script-boundary.md](../shared/references/agent-script-boundary.md) before using this skill.
-Read [../shared/references/workspace-model.md](../shared/references/workspace-model.md) when deciding what should remain evidence versus what should become derived state.
-Read [../shared/references/action-item-policy.md](../shared/references/action-item-policy.md) when the imported source introduces clear operational state.
-Read [references/ingestion-checklist.md](references/ingestion-checklist.md) before ingesting a large source.
-Read [references/import-conversion-policy.md](references/import-conversion-policy.md) before choosing how to stage the source.
-Read [references/large-document-reading.md](references/large-document-reading.md) before reading a large normalized source.
-Read [references/import-distillation-policy.md](references/import-distillation-policy.md) when deciding whether to continue into deep reconciliation now.
-Read [references/script-invocations.md](references/script-invocations.md) before running ingestion scripts if you need argument guidance.
-Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) before editing the import record summary.
+## Contract & Conventions
 
-## Available scripts
-
-- [scripts/ingest_document.py](scripts/ingest_document.py) — copy/register the source, create normalized text, and create the import record
-- [scripts/sync_import_state.py](scripts/sync_import_state.py) — refresh import-record metadata and generated views after direct import-record edits
-
-## Checklist
-
-- ingest the source first
-- read normalized text instead of the original binary when possible
-- edit the import record directly
-- sync structural state after the edit
-- continue to deep distillation only if full reconciliation is needed now
+- **Database Location:** The Knowledge Database defaults to `knowledge/` in the current workspace. If you cannot find it, ask the user for permission to initialize it.
+- **Raw Inputs:** Exact copies of documents or raw HTML from URLs MUST be saved to `knowledge/raw/docs/` or `knowledge/raw/urls/` respectively.
+- **Parsed Text:** Extracted, readable Markdown MUST be saved to `knowledge/parsed/docs/` or `knowledge/parsed/urls/`.
+- **Pending State:** Parsed files MUST be marked with `**Status:** Pending Distillation` at the top.
+- **Index Update:** An explicit relative link to the parsed text MUST be added to `knowledge/indexes/sources-index.md`.
 
 ## Workflow
 
-1. If the workspace is not initialized yet, run `python ../shared/scripts/bootstrap_workspace.py ...` first.
-2. Run `python scripts/ingest_document.py ...`.
-3. Read the normalized text in `memory/imports/text/...`, not the original binary, unless the original artifact is required.
-4. Edit the import record’s `## Source Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes` directly.
-5. If the document introduced explicit canonical action items, prepare the structured payload for them.
-6. Run `python scripts/sync_import_state.py ...`.
-7. By default, continue into `distilling-threads` if the user wants the import fully reconciled immediately.
-
-## Validation Loop
-
-- Confirm the original file, normalized text, and import record all exist.
-- Confirm the import record preview matches the `## Source Summary`.
-- Confirm `memory/views/imports.md` and `memory/views/pending-distillation.md` reflect the import.
-- If canonical action items were passed, confirm they appear in `memory/views/action-items.md`.
+1. **Locate the Database:** Check if the Knowledge Database exists. Initialize it if the user approves.
+2. **Fetch Raw Evidence:**
+   - **For Documents:** Copy the original file (e.g., PDF, DOCX) into `knowledge/raw/docs/`.
+   - **For URLs:** Fetch the content of the URL and save the raw HTML or text into `knowledge/raw/urls/`.
+3. **Extract Text:**
+   - Read the document or URL using your available tools.
+   - Extract the meaningful text and convert it into a clean Markdown format.
+4. **Save Parsed Markdown:**
+   - Save the extracted Markdown into `knowledge/parsed/docs/` (or `urls/`), using a descriptive filename based on the source (e.g., `knowledge/parsed/docs/design-doc.md`).
+   - Add the following header at the top of the new Markdown file:
+     ```markdown
+     # [Source Title or Filename]
+     
+     **Source:** [Path to raw file or original URL]
+     **Status:** Pending Distillation
+     
+     ```
+5. **Update Sources Index:**
+   - Check if `knowledge/indexes/sources-index.md` exists. If not, create it.
+   - Append an explicit relative Markdown link pointing to the newly parsed file.
+     - Example: `- [Design Doc](../parsed/docs/design-doc.md)`
+6. **Confirm:** Let the user know the document/URL has been ingested and is pending distillation.
 
 ## Gotchas
 
-- Prefer normalized text over the original binary for reading and citation.
-- The `## Source Summary` should be navigational, not exhaustive.
-- `sync_import_state.py` does not summarize the document for you. Edit the import record first, then sync.
-- The current workflow does not use a separate import-update wrapper. Use direct edits plus `sync_import_state.py`.
-- Only call wrappers in `scripts/` or `../shared/scripts/`. Do not treat shared Python modules as normal entrypoints.
+- **Do not distill yet:** Do not attempt to summarize or extract topics during this step. Your goal is simply to convert the source into a readable Markdown file that preserves the original information.
+- **Handling Images/Binary Data:** If the source document contains images that you cannot extract, simply note `[Image omitted]` in the parsed Markdown text.
+- **Relative Linking:** Always use relative links (e.g., `../parsed/docs/file.md`) when updating the `sources-index.md` to ensure the Knowledge Database is portable.

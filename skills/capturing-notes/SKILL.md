@@ -1,60 +1,46 @@
 ---
 name: capturing-notes
-description: Use this skill when the user is adding rough notes, continuing an active note-taking session, or asking to append information into a thread. It handles thread selection, raw snippet capture, direct editing of thread-local derived prose, and structural follow-up with the capture and sync scripts.
-compatibility: Requires Python 3, a writable workspace root, and the Epiphany workspace layout.
-metadata:
-  owner: epiphany
+description: >
+  Captures raw user notes and appends them to a chronologically ordered daily log within the Knowledge Database.
+  Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or
+  save raw thoughts and details so they can be distilled later.
 ---
 
 # Capturing Notes
 
-Capture raw note evidence first. Keep semantic edits agent-authored and use scripts only for structural state.
+This skill guides you through capturing raw user notes and appending them to a chronologically ordered daily log within the Knowledge Database.
 
-Read [../shared/references/agent-script-boundary.md](../shared/references/agent-script-boundary.md) before using this skill.
-Read [../shared/references/workspace-model.md](../shared/references/workspace-model.md) when you need to decide where captured information belongs.
-Read [../shared/references/action-item-policy.md](../shared/references/action-item-policy.md) when notes imply tasks or unresolved questions.
-Read [references/thread-selection.md](references/thread-selection.md) when you need to decide whether to append to an existing thread or start a new one.
-Read [references/lightweight-distillation.md](references/lightweight-distillation.md) before performing the thread-local synthesis update.
-Read [references/capture-edge-cases.md](references/capture-edge-cases.md) when routing or task extraction is ambiguous.
-Read [references/script-invocations.md](references/script-invocations.md) before running capture scripts if you need argument guidance.
-Read [../shared/references/citation-rules.md](../shared/references/citation-rules.md) if you are writing or revising thread-local summaries.
+## Contract & Conventions
 
-## Available scripts
-
-- [scripts/capture_note.py](scripts/capture_note.py) — create or append to a thread and add a raw snippet
-- [scripts/sync_thread_state.py](scripts/sync_thread_state.py) — refresh thread metadata and mechanical views after direct thread edits
-- [scripts/thread_status.py](scripts/thread_status.py) — inspect current thread state
-
-## Checklist
-
-- choose the correct thread or ask if routing is ambiguous
-- capture raw evidence first
-- edit thread-local prose directly
-- sync structural state after the edit
-- verify the thread and views reflect the update
+- **Database Location:** The Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **File Path:** Captured notes MUST be appended to `knowledge/parsed/logs/YYYY-MM-DD.md` where `YYYY-MM-DD` is the current date.
+- **Format:** Every captured snippet MUST include a timestamp (`HH:MM`) heading, followed by the raw content exactly as the user provided it.
+- **Pending State:** If a log file receives new notes, it MUST contain a clear indicator that it is awaiting distillation (e.g., `**Status:** Pending Distillation` at the top of the file).
 
 ## Workflow
 
-1. Start from `memory/README.md` and `memory/views/open-threads.md`.
-2. If the workspace is not initialized yet, run `python ../shared/scripts/bootstrap_workspace.py ...` first.
-3. Decide whether to append to an existing thread or create a new one.
-4. Run `python scripts/capture_note.py ...` to append the raw note.
-5. Edit the thread’s `## Current Summary`, `## Open Questions`, `## Candidate Action Items`, and `## Distillation Notes` directly.
-6. If the note introduced explicit canonical action items, prepare the structured payload for them.
-7. Run `python scripts/sync_thread_state.py ...` to refresh preview, pending state, and views.
-
-## Validation Loop
-
-- Run `python scripts/thread_status.py ...` after syncing.
-- Confirm the thread preview matches the current summary.
-- Confirm `memory/views/open-threads.md` and `memory/views/pending-distillation.md` reflect the update.
-- If you added explicit canonical action items, confirm they appear in `memory/views/action-items.md`.
+1. **Locate the Database:** Check if `knowledge/parsed/logs/` exists. If not, prompt the user for permission to initialize the `knowledge/` structure.
+2. **Determine Time:** Determine today's date (`YYYY-MM-DD`) and the current time (`HH:MM`).
+3. **Initialize Daily Log (if needed):**
+   If `knowledge/parsed/logs/YYYY-MM-DD.md` does not exist, create it with the following template:
+   ```markdown
+   # Daily Log: YYYY-MM-DD
+   
+   **Status:** Pending Distillation
+   
+   ```
+4. **Update Pending State:**
+   If the file already exists but does NOT have the `**Status:** Pending Distillation` indicator (because it was previously distilled), add the indicator back to the top of the file just below the title.
+5. **Append Note:**
+   Append the user's raw note exactly as provided, prefixed with the current timestamp heading:
+   ```markdown
+   ## HH:MM
+   
+   [Raw note text goes here]
+   ```
+6. **Confirm:** Let the user know the note was successfully captured and is pending distillation.
 
 ## Gotchas
 
-- `capture_note.py` does not summarize. It only appends raw evidence and thread metadata.
-- In normal capture, do not pass `--timestamp`; let `capture_note.py` stamp the current time internally. Use `--timestamp` only when the note must be recorded with a different time.
-- `sync_thread_state.py` does not decide what changed semantically. Edit the thread prose first, then sync.
-- Stale-open routing is based on `last_captured_at`, not on later metadata touches.
-- Do not close a thread from this skill. Use `distilling-threads` when the user asks to reconcile or close.
-- Only call wrappers in `scripts/` or `../shared/scripts/`. Do not treat shared Python modules as normal entrypoints.
+- **Do not summarize during capture:** Your job right now is purely to capture the raw evidence. Do not attempt to rephrase, summarize, or distill the note yet. Preserve the exact fidelity of the user's input.
+- **Missing directories:** Use file creation tools that automatically create parent directories if `knowledge/parsed/logs/` does not exist yet (assuming the user approved initialization).
