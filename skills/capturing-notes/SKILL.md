@@ -1,11 +1,11 @@
 ---
 name: capturing-notes
-description: Captures raw user notes and appends them to a chronologically ordered daily log within the Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details so they can be distilled later.
+description: Captures raw user notes and appends them to a chronologically ordered daily log within the Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details.
 ---
 
 # Capturing Notes
 
-This skill guides you through capturing raw user notes and appending them to a chronologically ordered daily log within the Knowledge Database.
+This skill guides you through capturing raw user notes and appending them to a chronologically ordered daily note file within the Knowledge Database.
 
 ## Contract & Conventions
 
@@ -41,10 +41,10 @@ This skill guides you through capturing raw user notes and appending them to a c
 
 You are an active participant in the note-taking process, not just a passive transcriber. If a note lacks context or seems unclear, point it out to the user to ensure the final distilled knowledge is as informative as possible.
 
-Always format your response to the user using the following template:
+Always format your response to the user using the following template. Ensure that the file path is formatted as a clickable relative markdown link (e.g., `[2026-04-09.md](knowledge/parsed/notes/2026-04-09.md)`):
 
 ```markdown
-**Note Captured to `[File Path]`!** [Add any brief observations, missing context, or inconsistencies you noticed here]
+**Note Captured to [[File Path]]([Relative Markdown Link])!** [Add any brief observations, missing context, or inconsistencies you noticed here]
 
 ### Current Context (HH:00)
 > [Quote the recent notes captured in the current hour block so the user has an anchor of what was just recorded]
@@ -59,3 +59,4 @@ Always format your response to the user using the following template:
 - **Do not summarize during capture:** Your job right now is purely to capture the raw evidence into the log. Do not attempt to rephrase, summarize, or distill the note yet. Preserve the exact fidelity of the user's input.
 - **Capture first, clarify later:** Never block raw capture on perfect categorization or complete context. Capture the raw input first, then use your response to ask clarifying questions.
 - **Missing directories:** Use file creation tools that automatically create parent directories if `knowledge/parsed/logs/` does not exist yet (assuming the user approved initialization).
+
