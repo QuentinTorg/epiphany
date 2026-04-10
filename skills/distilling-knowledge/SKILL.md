@@ -38,7 +38,9 @@ This skill guides you through the process of reading freshly ingested raw materi
    - **Crucial:** Cite your sources! When adding facts to a Topic, link back to the parsed file that provided the fact (e.g., `Decided to use Postgres ([Source](../parsed/notes/2026-04-09.md))`).
    - If new tasks or open questions are found, add them as `- [ ]` checklist items within the Topic.
 5. **Update Indexes:**
-   - If you created any *new* Topic files, you MUST add a relative link to them in `knowledge/indexes/topics-index.md`. Create the index file if it doesn't exist.
+   - If you created any *new* Topic files, you MUST add a relative link to them in `knowledge/indexes/topics-index.md`, followed by a brief, single-line description of what the topic covers. Create the index file if it doesn't exist.
+     - Example: `- [Project Alpha](../topics/project-alpha.md) - Main topic tracking the development and architecture of Project Alpha.`
+   - If you updated the summary of a daily note file (e.g., `knowledge/parsed/notes/2026-04-09.md`), ensure that note file is listed in `knowledge/indexes/sources-index.md` with a single-line summary of the day's events.
 6. **Mark as Distilled:**
    - After successfully distilling a parsed entry or document, edit that file to replace the `[PENDING]` tag with `[DISTILLED]`.
 7. **Validate:**
