@@ -1,25 +1,25 @@
 ---
 name: ingesting-documents
-description: Ingests documents (e.g., PDF, DOCX, TXT, ...) and web URLs by copying them to a raw inputs directory and extracting them into parsed Markdown text. Use this skill when the user asks you to import, read, or ingest a file or a web link into the Knowledge Database.
+description: Ingests documents (e.g., PDF, DOCX, TXT, ...) and web URLs by copying them to a raw inputs directory and extracting them into parsed Markdown text. Use this skill when the user asks you to import, read, or ingest a file or a web link into the Epiphany Knowledge Database.
 ---
 
 # Ingesting Documents & URLs
 
-This skill guides you through ingesting external files or web URLs into the Knowledge Database. The process preserves the raw original evidence while extracting a parsed Markdown version that is ready for distillation.
+This skill guides you through ingesting external files or web URLs into the Epiphany Knowledge Database. The process preserves the raw original evidence while extracting a parsed Markdown version that is ready for distillation.
 
 ## Contract & Conventions
 
-- **Database Location:** The Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
-- **Raw Inputs:** Exact copies of documents or raw HTML from URLs MUST be saved to `knowledge/raw/imports/`.
+- **Database Location:** The Epiphany Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **Raw Inputs:** Exact copies of binary documents (e.g., PDFs, DOCX) or raw HTML from URLs MUST be saved to `knowledge/raw/imports/`. If the source is already a plain-text or readable data file (e.g., `.txt`, `.md`, `.csv`, `.json`, source code), you may skip saving it to the `raw` directory and proceed directly to parsing.
 - **Parsed Text:** Extracted, readable Markdown MUST be saved to `knowledge/parsed/imports/`.
 - **Pending State:** Parsed files MUST be marked with `[PENDING]` in their title header so the distilling agent knows they need to be processed.
 - **Index Update:** An explicit relative link to the parsed text MUST be added to `knowledge/indexes/sources-index.md`.
 
 ## Workflow
 
-1. **Locate the Database:** Check if the Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
+1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
 2. **Fetch Raw Evidence:**
-   - **For Documents:** Copy the original file (e.g., PDF, DOCX) into `knowledge/raw/imports/`.
+   - **For Documents:** If the document is a binary format (e.g., PDF, DOCX), copy the original file into `knowledge/raw/imports/`. If it is already plain-text or readable data (e.g., `.md`, `.txt`, `.csv`, `.json`), you may skip this step.
    - **For URLs:** Fetch the content of the URL and save the raw HTML or text into `knowledge/raw/imports/`.
 3. **Extract Text:**
    - Use whatever tools are at your disposal to extract text from the source. For example, you might use standard utilities like `pdftotext` for PDFs, `pandoc` for documents, or even write a quick Python script if no direct tool is available.
@@ -56,4 +56,5 @@ Would you like me to distill this newly ingested document into topics right now 
 
 - **Do not distill yet:** Do not attempt to summarize or extract topics during this step. Your goal is simply to convert the source into a readable Markdown file that preserves the original information.
 - **Handling Images/Binary Data:** If the source document contains images that you cannot extract, simply note `[Image omitted]` in the parsed Markdown text.
-- **Relative Linking:** Always use relative links (e.g., `../parsed/imports/file.md`) when updating the `sources-index.md` to ensure the Knowledge Database is portable.
+- **Relative Linking:** Always use relative links (e.g., `../parsed/imports/file.md`) when updating the `sources-index.md` to ensure the Epiphany Knowledge Database is portable.
+sources-index.md` to ensure the Epiphany Knowledge Database is portable.

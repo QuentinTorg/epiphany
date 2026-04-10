@@ -1,15 +1,15 @@
 ---
 name: querying-database
-description: Queries the Knowledge Database for information across topics, documents, and notes. Use this skill when the user asks you a direct question about past work, decisions, people, projects, tasks, or any other knowledge stored in the database.
+description: Queries the Epiphany Knowledge Database for information across topics, documents, and notes. Use this skill when the user asks you a direct question about past work, decisions, people, projects, tasks, or any other knowledge stored in the database.
 ---
 
-# Querying the Knowledge Database
+# Querying the Epiphany Knowledge Database
 
-This skill guides searching the Knowledge Database to answer questions accurately and with citations. Queries are interactive; ask for clarification if ambiguous.
+This skill guides searching the Epiphany Knowledge Database to answer questions accurately and with citations. Queries are interactive; ask for clarification if ambiguous.
 
 ## Contract & Conventions
 
-- **Database Location:** The Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **Database Location:** The Epiphany Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
 - **Indexes:** The database maintains two index files as entrypoints:
   - `knowledge/indexes/topics-index.md`: A table of contents listing all the distilled subject summaries (Topics).
   - `knowledge/indexes/sources-index.md`: A table of contents listing all the raw imported documents and URLs that have been parsed.
@@ -20,12 +20,12 @@ This skill guides searching the Knowledge Database to answer questions accuratel
 - **Accuracy & Hallucinations:** Accuracy is key. You MUST NOT hallucinate facts. Information should be based strictly on a raw source of truth.
 - **Citations:** Every factual claim in your answer MUST include a citation pointing to the file that provided the information, formatted as a clickable relative Markdown link (e.g., `([Source](knowledge/topics/project-alpha.md))`).
 - **Assumptions:** Explicitly label and justify any logical conclusions (e.g., "Assumption:" or "Logical Conclusion:").
-- **Outside Information:** If pulling information from outside resources, ask the user if it should be added to the Knowledge Database.
+- **Outside Information:** If pulling information from outside resources, ask the user if it should be added to the Epiphany Knowledge Database.
 - **Interactivity:** If a query is unclear or yields no results, ask the user for clarification.
 
 ## Workflow
 
-1. **Locate the Database:** Check if the Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
+1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
 2. **Determine Research Path:** Choose the best combination of strategies:
    - **Use Indexes & Links:** For broad concepts, read `topics-index.md`. For specific documents, read `sources-index.md`.
    - **Use Text Search:** For specific keywords or undiscovered leads, perform a text search across `knowledge/topics/` and/or `knowledge/parsed/`.
