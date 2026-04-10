@@ -9,7 +9,7 @@ This skill guides you through the process of reading freshly ingested raw materi
 
 ## Contract & Conventions
 
-- **Database Location:** The Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **Database Location:** The Epiphany Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
 - **Pending Files:** A file or a specific hour-level block in `knowledge/parsed/` (notes, imports) is pending distillation if it contains the text `[PENDING]` in its heading. This allows block-level disambiguation in daily notes.
 - **Topics (`knowledge/topics/`):** Living summaries of specific subjects (e.g., people, projects, systems, decisions). They are standard Markdown files.
 - **Indexes (`knowledge/indexes/`):** Markdown files acting as a table of contents for Topics and Sources. You must update `topics-index.md` whenever you create a new Topic.

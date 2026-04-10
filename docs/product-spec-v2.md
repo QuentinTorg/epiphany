@@ -1,4 +1,4 @@
-# Product Spec: Epiphany v2 (Knowledge Database)
+# Product Spec: Epiphany v2 (Epiphany Knowledge Database)
 
 ## Overview
 Epiphany v2 is a markdown-native knowledge database. It acts as a comprehensive knowledge-base that ingests raw input from various sources, extracts it to text, and distills it into highly cross-referenced topic summaries. It is designed to be universally available across any user workspace to capture context, requirements, and debugging steps natively.
@@ -19,6 +19,6 @@ Epiphany v2 is a markdown-native knowledge database. It acts as a comprehensive 
 
 ## Product Usage & Skills
 - **Capture Note Skill:** The user provides text input. The agent appends the raw text (with a timestamp) to today's notes in `knowledge/parsed/notes/` and marks it as pending distillation.
-- **Ingest Document & URL Skill:** A single, consolidated skill. The user provides a file path or URL. The agent fetches the data to `knowledge/raw/`, extracts its text to `knowledge/parsed/`, marks it as pending distillation, and adds a link to the `sources-index.md`.
+- **Ingest Document & URL Skill:** A single, consolidated skill. The user provides a file path or URL. The agent fetches binary data to `knowledge/raw/`, extracts its text to `knowledge/parsed/`, marks it as pending distillation, and adds a link to the `sources-index.md`. Plain-text and readable data documents skip the `raw` directory and go straight to parsing.
 - **Distillation Skill:** The agent checks for pending parsed files, extracts relevant facts, updates `knowledge/topics/*.md`, ensures the information "bubbles up" into high-level summaries, updates `topics-index.md`, and marks the parsed file as successfully distilled.
 - **Query Skill:** The agent answers questions by starting at the Indexes, following relative links to Topics, and reading the distilled knowledge. If the database path is unknown, it asks the user for the location or permission to initialize a new one.

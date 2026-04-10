@@ -1,15 +1,15 @@
 ---
 name: capturing-notes
-description: Captures raw user notes and appends them to a chronologically ordered daily log within the Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details.
+description: Captures raw user notes and appends them to a chronologically ordered daily log within the Epiphany Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details.
 ---
 
 # Capturing Notes
 
-This skill guides you through capturing raw user notes and appending them to a chronologically ordered daily note file within the Knowledge Database.
+This skill guides you through capturing raw user notes and appending them to a chronologically ordered daily note file within the Epiphany Knowledge Database.
 
 ## Contract & Conventions
 
-- **Database Location:** The Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **Database Location:** The Epiphany Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
 - **File Path:** Captured notes MUST be appended to `knowledge/parsed/notes/YYYY-MM-DD.md` where `YYYY-MM-DD` is the current date.
 - **Format:** Group consecutive notes under hour-level timestamps (`HH:00`) instead of creating a new heading for every minute. This maintains readability when a user provides rapid-fire notes. Append the raw content exactly as provided, usually as bullet points or consecutive paragraphs.
 - **Pending State:** The hour-level heading MUST be marked with a `[PENDING]` tag if any note underneath it has not been distilled yet.
