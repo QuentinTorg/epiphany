@@ -24,20 +24,28 @@ This skill guides you through the process of reading freshly ingested raw materi
 2. **Review & Extract:**
    - Read the contents of each pending file. For notes, focus ONLY on the specific entries marked with `[PENDING]`.
    - Identify the core entities, decisions, topics, tasks, and open questions from those pending sections.
-3. **Update or Create Topics:**
+3. **Write Source Summary:**
+   - Before navigating away to update the topics, add or update a brief `**Summary:**` section at the very top of the parsed document (just under the title) for BOTH daily notes and imported documents.
+   - For daily notes, maintain a single, cumulative summary of the day's events at the top of the file, rather than summarizing each hourly block individually.
+   - **Intent:** The summary should act as an abstract or index describing *what kind of information* the agent will find within the file, rather than trying to be a standalone representation of all facts inside it. Its purpose is to help future agents quickly decide if they need to continue reading the rest of the file for deeper context.
+   - **Navigability:** For large documents or long daily notes, the summary MUST include specific keywords, tags, or exact Markdown heading references (e.g., `[See: ## API Schema Definitions]`) so that a future agent reading the summary knows *exactly* where to search or jump to within the file to find the relevant details.
+4. **Update or Create Topics:**
    - For each major subject identified, locate its corresponding Topic file in `knowledge/topics/` (e.g., `project-alpha.md`).
-   - If the Topic file doesn't exist, create it.
-   - Summarize the new findings and append/integrate them into the Topic file.
+   - If the Topic file doesn't exist, create it. Be mindful to avoid creating many tiny topic files for trivial or transient details; prefer grouping related information into broader topics.
+   - **Cross-topic Search:** When creating a *new* topic, perform a text search across existing topics to find any other mentions of this new topic. Extract that relevant information into the new topic to ensure information is properly grouped and to minimize duplication.
+   - Summarize the new findings and append/integrate them into the Topic file. Ensure any related topics mentioned in your summary are hyperlinked as relative Markdown links.
+   - **Topic Sizing:** If an existing Topic file is getting too large or begins to cover too many disparate subtopics, split it by creating a new, more specific Topic file (e.g., `project-alpha-architecture.md`). Move the relevant content to the new file, and leave a relative link to the new subtopic in the parent Topic file.
    - **Crucial:** Cite your sources! When adding facts to a Topic, link back to the parsed file that provided the fact (e.g., `Decided to use Postgres ([Source](../parsed/notes/2026-04-09.md))`).
    - If new tasks or open questions are found, add them as `- [ ]` checklist items within the Topic.
-4. **Update Indexes:**
+5. **Update Indexes:**
    - If you created any *new* Topic files, you MUST add a relative link to them in `knowledge/indexes/topics-index.md`. Create the index file if it doesn't exist.
-5. **Mark as Distilled:**
+6. **Mark as Distilled:**
    - After successfully distilling a parsed entry or document, edit that file to replace the `[PENDING]` tag with `[DISTILLED]`.
-6. **Validate:**
+7. **Validate:**
+   - Ensure that the information from the parsed file being marked `[DISTILLED]` has actually been appropriately distilled into the topics
    - Read back the parsed file to ensure `[DISTILLED]` replaced `[PENDING]` without corrupting the rest of the file.
    - Check the syntax of any new relative Markdown links you created in Topics or Indexes.
-7. **Confirm:**
+8. **Confirm:**
    - Respond to the user using the strict formatting outlined in the "Assistant Persona & Response Format" section below.
 
 ## Assistant Persona & Response Format
