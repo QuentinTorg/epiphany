@@ -18,7 +18,7 @@ Epiphany v2 is a markdown-native knowledge database. It acts as a comprehensive 
 - **Human Readability & Editing:** The workspace must remain easily inspectable and editable by humans. If a human modifies a topic, the Markdown structure ensures the agent can still read and append to it later without breaking state.
 
 ## Product Usage & Skills
-- **Capture Note Skill:** The user provides text input. The agent appends the raw text (with a timestamp) to today's log in `knowledge/parsed/logs/` and marks it as pending distillation.
+- **Capture Note Skill:** The user provides text input. The agent appends the raw text (with a timestamp) to today's notes in `knowledge/parsed/notes/` and marks it as pending distillation.
 - **Ingest Document & URL Skill:** A single, consolidated skill. The user provides a file path or URL. The agent fetches the data to `knowledge/raw/`, extracts its text to `knowledge/parsed/`, marks it as pending distillation, and adds a link to the `sources-index.md`.
 - **Distillation Skill:** The agent checks for pending parsed files, extracts relevant facts, updates `knowledge/topics/*.md`, ensures the information "bubbles up" into high-level summaries, updates `topics-index.md`, and marks the parsed file as successfully distilled.
 - **Query Skill:** The agent answers questions by starting at the Indexes, following relative links to Topics, and reading the distilled knowledge. If the database path is unknown, it asks the user for the location or permission to initialize a new one.

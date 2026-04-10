@@ -28,7 +28,7 @@ These skills are designed to be universally available. They don't have to be res
 
 The core skills provided are:
 
-- `capturing-notes`: Appends text to a daily parsed log.
+- `capturing-notes`: Appends text to a daily parsed note file.
 - `ingesting-documents`: Consolidates raw files/URLs and extracts text.
 - `distilling-knowledge`: Reads pending parsed text and updates topics and indexes with explicit relative links.
 - `querying-database`: Uses indexes to fast-travel to topics and provides cited answers.
