@@ -21,8 +21,11 @@ This skill guides you through the process of reading freshly ingested raw materi
 
 1. **Locate Pending Files:**
    - Search the `knowledge/parsed/` directory (including `notes`, `imports`) for any files containing the text `[PENDING]`.
+   - **Crucial Rule:** You MUST process each pending document entirely (steps 2-7) before moving on to the next. Do not try to read and distill multiple documents simultaneously.
+   - **Subagent Delegation:** When possible, it is recommended to delegate the distillation of each individual document to a subagent. This will result in the most consistent performance of distillation
 2. **Review & Extract:**
    - Read the contents of each pending file. For notes, focus ONLY on the specific entries marked with `[PENDING]`.
+   - **Chunking Large Documents:** If you are distilling a very large document, do not attempt to read and extract the entire text at once. Break the document down into smaller, logical chunks (e.g., by section or heading) and perform the extraction and topic updates for each chunk sequentially to maintain high extraction quality and avoid overwhelming your context window.
    - Identify the core entities, decisions, topics, tasks, and open questions from those pending sections.
 3. **Write Source Summary:**
    - Before navigating away to update the topics, add or update a brief `**Summary:**` section at the very top of the parsed document (just under the title) for BOTH daily notes and imported documents.
@@ -44,7 +47,8 @@ This skill guides you through the process of reading freshly ingested raw materi
 6. **Mark as Distilled:**
    - After successfully distilling a parsed entry or document, edit that file to replace the `[PENDING]` tag with `[DISTILLED]`.
 7. **Validate:**
-   - Ensure that the information from the parsed file being marked `[DISTILLED]` has actually been appropriately distilled into the topics
+   - Ensure that the information from the parsed file being marked `[DISTILLED]` has actually been appropriately distilled into the topics.
+   - Verify that all newly added facts in the Topic files include a valid citation link back to the source document.
    - Read back the parsed file to ensure `[DISTILLED]` replaced `[PENDING]` without corrupting the rest of the file.
    - Check the syntax of any new relative Markdown links you created in Topics or Indexes.
 8. **Confirm:**
