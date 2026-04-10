@@ -37,7 +37,7 @@ This skill guides you through ingesting external files or web URLs into the Know
      ```
 5. **Update Sources Index:**
    - Check if `knowledge/indexes/sources-index.md` exists. If not, create it.
-   - Append an explicit relative Markdown link pointing to the newly parsed file, followed by a brief, single-line description of the document so future agents know what it contains.
+   - Append an explicit relative Markdown link pointing to the newly parsed file, followed by a brief, single-line description of its contents.
      - Example: `- [Design Doc](../parsed/imports/design-doc.md) - Raw imported PDF containing the v2 architecture design.`
 6. **Validate:** Read back the updated `sources-index.md` and the newly created markdown file to verify they were formatted correctly and the links are valid.
 7. **Confirm & Offer Distillation:** Respond to the user using the strict formatting outlined in the "Assistant Persona & Response Format" section below.

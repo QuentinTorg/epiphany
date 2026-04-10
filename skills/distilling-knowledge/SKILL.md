@@ -25,13 +25,13 @@ This skill guides you through the process of reading freshly ingested raw materi
    - **Subagent Delegation:** When possible, it is recommended to delegate the distillation of each individual document to a subagent. This will result in the most consistent performance of distillation
 2. **Review & Extract:**
    - Read the contents of each pending file. For notes, focus ONLY on the specific entries marked with `[PENDING]`.
-   - **Chunking Large Documents:** If you are distilling a very large document, do not attempt to read and extract the entire text at once. Break the document down into smaller, logical chunks (e.g., by section or heading) and perform the extraction and topic updates for each chunk sequentially to maintain high extraction quality and avoid overwhelming your context window.
+   - **Chunking Large Documents:** For very large documents, extract and update topics in smaller, logical chunks (e.g., by section) to avoid context exhaustion.
    - Identify the core entities, decisions, topics, tasks, and open questions from those pending sections.
 3. **Write Source Summary:**
-   - Before navigating away to update the topics, add or update a brief `**Summary:**` section at the very top of the parsed document (just under the title) for BOTH daily notes and imported documents.
-   - For daily notes, maintain a single, cumulative summary of the day's events at the top of the file, rather than summarizing each hourly block individually.
-   - **Intent:** The summary should act as an abstract or index describing *what kind of information* the agent will find within the file, rather than trying to be a standalone representation of all facts inside it. Its purpose is to help future agents quickly decide if they need to continue reading the rest of the file for deeper context.
-   - **Navigability:** For large documents or long daily notes, the summary MUST include specific keywords, tags, or exact Markdown heading references (e.g., `[See: ## API Schema Definitions]`) so that a future agent reading the summary knows *exactly* where to search or jump to within the file to find the relevant details.
+   - Add or update a brief `**Summary:**` section at the very top of the parsed document (just under the title).
+   - For daily notes, maintain a single, cumulative summary of the day's events at the top of the file rather than per block.
+   - **Intent:** The summary acts as an abstract describing *what kind of information* is in the file, helping future agents decide if they need to read deeper.
+   - **Navigability:** The summary MUST include specific keywords, tags, or Markdown heading references (e.g., `[See: ## API Schema Definitions]`) to enable fast navigation.
 4. **Update or Create Topics:**
    - For each major subject identified, locate its corresponding Topic file in `knowledge/topics/` (e.g., `project-alpha.md`).
    - If the Topic file doesn't exist, create it. Be mindful to avoid creating many tiny topic files for trivial or transient details; prefer grouping related information into broader topics.
@@ -77,4 +77,4 @@ Always format your response to the user using the following template. You MUST i
 - **Conflict Handling:** If the pending file contradicts existing information in a Topic, do NOT just overwrite the old info. Instead, record both perspectives and create an Open Question (`- [ ] Resolve conflict between...`) in the Topic file, citing both sources.
 - **Relative Pathing:** Be extremely careful with relative paths. A Topic in `knowledge/topics/topic.md` linking to a note in `knowledge/parsed/notes/note.md` must use `../parsed/notes/note.md`.
 - **Pending State:** Keep the source pending if contradictions, missing information, or unresolved ambiguity still block completion. Do not mark a source complete only because structural updates succeeded.
-- **Git Commits:** If the workspace is a Git repository, after successful distillation, offer to make a commit for the user. Show the exact `git commit` command but wait for explicit approval.
+- **Git Commits:** If the workspace is a Git repository, after successful distillation, offer to make a commit for the user. Since the database might not be in your current directory, use the `git -C <path>` argument to run the commit command on the remote directory (e.g., `git -C path/to/knowledge add . && git -C path/to/knowledge commit -m "..."`). Show the exact command but wait for explicit approval.
