@@ -26,18 +26,19 @@ This skill guides searching the Epiphany Knowledge Database to answer questions 
 ## Workflow
 
 1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
-2. **Determine Research Path:** Choose the best combination of strategies:
+2. **Check for Pending Knowledge:** Before querying, search the `knowledge/parsed/` directory for any files containing the text `[PENDING]`. If pending files exist, you MUST warn the user that the knowledge base is not fully distilled and ask if they would like you to run the `distilling-knowledge` skill before proceeding with the answer. You can still attempt to answer the query, but make sure the user knows the information might be incomplete.
+3. **Determine Research Path:** Choose the best combination of strategies:
    - **Use Indexes & Links:** For broad concepts, read `topics-index.md`. For specific documents, read `sources-index.md`.
    - **Use Text Search:** For specific keywords or undiscovered leads, perform a text search across `knowledge/topics/` and/or `knowledge/parsed/`.
-3. **Explore & Synthesize:**
+4. **Explore & Synthesize:**
    - Open the most relevant Topic files or search results.
    - Follow relative links back to original `knowledge/parsed/` files if deeper context is needed.
    - When exploring `knowledge/parsed/` files, read the `**Summary:**` at the top first to quickly map information.
    - If you cannot find the answer, or if the request is ambiguous, stop and ask the user for clarification to help narrow the search.
-4. **Validate:**
+5. **Validate:**
    - Ensure every factual claim has a corresponding citation.
    - Verify that your citations are formatted as valid, clickable relative Markdown links.
-5. **Report:**
+6. **Report:**
    - Respond to the user using the strict formatting outlined in the "Assistant Persona & Response Format" section below.
 
 ## Assistant Persona & Response Format
@@ -60,4 +61,5 @@ Always format your response to the user using the following template. Ensure tha
 - **Balancing Strategies:** Balance your tools: text search may return noise for broad topics, while relying only on indexes may miss recent raw notes. Use your judgment.
 - **Time/Entity Questions:** For queries like "What did Billy work on?", check `billy.md` but also text-search recent notes for undiscovered facts.
 - **Contradictions:** If you find contradictory information, present both sides in your answer, citing both sources. Do not pick a "winner" unless a more recent source explicitly resolves the conflict.
+- **Answer Style:** Prefer concise answers over long narrative walkthroughs. Escalate from high-level topics into deeper evidence only when needed. source explicitly resolves the conflict.
 - **Answer Style:** Prefer concise answers over long narrative walkthroughs. Escalate from high-level topics into deeper evidence only when needed.
