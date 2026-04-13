@@ -1,8 +1,0 @@
-[
-  { "query": "Reconcile this thread into topics and tasks.", "should_trigger": true },
-  { "query": "Close the robot debugging thread after bubbling everything up.", "should_trigger": true },
-  { "query": "Recover the pending distillation work in this workspace.", "should_trigger": true },
-  { "query": "Append this rough note to the current open thread.", "should_trigger": false },
-  { "query": "What is Billy working on?", "should_trigger": false },
-  { "query": "Import this requirements document into the workspace.", "should_trigger": false }
-]
