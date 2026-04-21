@@ -1,18 +1,20 @@
 ---
 name: capturing-notes
-description: Captures raw user notes and appends them to a chronologically ordered daily log within the Epiphany Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details.
+description: Captures user notes, fixes typos, and appends them to a chronologically ordered daily log within the Epiphany Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details.
 ---
 
 # Capturing Notes
 
-This skill guides you through capturing raw user notes and appending them to a chronologically ordered daily note file within the Epiphany Knowledge Database.
+This skill guides you through capturing user notes and appending them to a chronologically ordered daily note file within the Epiphany Knowledge Database.
 
 ## Contract & Conventions
 
 - **Database Location:** The Epiphany Knowledge Database defaults to a `epiphany_knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
 - **File Path:** Captured notes MUST be appended to `epiphany_knowledge/parsed/notes/YYYY-MM-DD.md` where `YYYY-MM-DD` is the current date.
-- **Format:** Group consecutive notes under hour-level timestamps (`HH:00`) instead of creating a new heading for every minute. This maintains readability when a user provides rapid-fire notes. Append the raw content exactly as provided, usually as bullet points or consecutive paragraphs.
+- **Format:** Group consecutive notes under hour-level timestamps (`HH:00`) instead of creating a new heading for every minute. This maintains readability when a user provides rapid-fire notes. You should fix obvious typos and break the input up into clear bullet points to improve readability, but you MUST directly use the user's original language and phrasing. Do not rewrite their input in your own voice.
 - **Pending State:** The hour-level heading MUST be marked with a `[PENDING]` tag if any note underneath it has not been distilled yet.
+- **Open Questions:** Unresolved questions should accumulate at the bottom of the daily log under an `## Open Questions` heading so they are not forgotten.
+- **Global Context:** You MUST silently read the entirety of `epiphany_knowledge/context.md` (if it exists) to establish baseline context. You are strictly forbidden from modifying it.
 
 ## Workflow
 
@@ -23,19 +25,22 @@ This skill guides you through capturing raw user notes and appending them to a c
    ```markdown
    # Daily Log: YYYY-MM-DD
 
+   ## Open Questions
+   
    ```
 4. **Append Note:**
    - Check if an hour-level heading for the current hour (e.g., `## 14:00 [PENDING]` or `## 14:00 [DISTILLED]`) already exists.
-   - If it does **not** exist, append a new heading and the note:
+   - If it does **not** exist, append a new heading and the note above the `## Open Questions` section:
      ```markdown
      ## HH:00 [PENDING]
 
-     - [Raw note text goes here]
+     - [Note text goes here]
      ```
-   - If it **does** exist, append the note under the existing heading as a new bullet or paragraph. If the heading is currently marked `[DISTILLED]`, change it back to `[PENDING]` so the distilling agent knows new information has arrived.DO NOT change any of the previously logged information
-5. **Validate:** Read the file back to verify the note was appended correctly under the `## HH:00 [PENDING]` heading without corrupting previous content.
-6. **Read Context:** Before replying, read the contents of today's log to understand the full context of what has been captured so far, even if it was captured in a previous session. Identify any missing context that would improve the clarity of the note, or open questions.
-7. **Confirm & Assist:** Respond to the user using the strict formatting outlined in the "Assistant Persona & Response Format" section below.
+   - If it **does** exist, append the note under the existing heading as a new bullet or paragraph. If the heading is currently marked `[DISTILLED]`, change it back to `[PENDING]` so the distilling agent knows new information has arrived. DO NOT change any of the previously logged information.
+5. **Manage Open Questions:** Only generate clarifying questions if the missing context makes the note ambiguous or materially reduces its future value. Do not generate questions just for the sake of conversation. Append new questions as checklist items (`- [ ]`) under the `## Open Questions` heading at the bottom of the daily log. On every turn, re-evaluate the existing open questions. If a question is answered by the new note, or if you determine a question is low-value, stale, or no longer relevant, remove it from the list entirely to keep the tracker lean and actionable.
+6. **Read Context:** Before replying, always silently read `epiphany_knowledge/context.md` (if it exists) to understand the user's established terminology, relationships, and identity so you do not ask redundant clarifying questions. Then, read the contents of today's log to understand the full context of what has been captured. If the user's note references unknown concepts, people, or projects not found in `context.md`, use your standard file search tools to quickly scan the existing database (`epiphany_knowledge/indexes/` or `epiphany_knowledge/topics/`) to establish context. Do not invoke the `querying-database` skill for this internal lookup. Identify any critical missing context that would improve the clarity of the note.
+7. **Validate:** Read the file back to verify the note was appended correctly under the `## HH:00 [PENDING]` heading without corrupting previous content or the open questions section.
+8. **Confirm & Assist:** Respond to the user using the strict formatting outlined in the "Assistant Persona & Response Format" section below.
 
 ## Assistant Persona & Response Format
 
@@ -49,14 +54,14 @@ Always format your response to the user using the following template. Ensure tha
 ### Current Context (HH:00)
 > [Quote the recent notes captured in the current hour block so the user has an anchor of what was just recorded]
 
-### Open Questions
-- [ ] [Explicit question the user asked]
-- [ ] [Clarifying question you generated because the provided info was ambiguous]
+### Open Questions Tracker
+[List the current unresolved questions from the daily log here, so the user has visibility]
 ```
 
 ## Gotchas
 
-- **Do not summarize during capture:** Your job right now is purely to capture the raw evidence into the log. Do not attempt to rephrase, summarize, or distill the note yet. Preserve the exact fidelity of the user's input.
-- **Capture first, clarify later:** Never block raw capture on perfect categorization or complete context. Capture the raw input first, then use your response to ask clarifying questions.
+- **Do not summarize or revoice during capture:** Your job is to capture the raw evidence. While you should fix typos and organize into bullets, DO NOT attempt to summarize, distill, or rewrite the note in your own "terse" or "assistant" voice. Use the user's exact wording.
+- **NEVER apply the `[DISTILLED]` tag:** As the note taker, you are strictly forbidden from marking any heading as `[DISTILLED]`. Even if a meeting is over or an hour has passed, new blocks MUST be marked `[PENDING]`. Only the `distilling-knowledge` skill may apply the `[DISTILLED]` tag.
 - **Missing directories:** Use file creation tools that automatically create parent directories if `epiphany_knowledge/parsed/notes/` does not exist yet (assuming the user approved initialization).
-
+DISTILLED]` tag.
+- **Missing directories:** Use file creation tools that automatically create parent directories if `epiphany_knowledge/parsed/notes/` does not exist yet (assuming the user approved initialization).
