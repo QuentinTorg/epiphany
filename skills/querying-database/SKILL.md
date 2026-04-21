@@ -9,31 +9,31 @@ This skill guides searching the Epiphany Knowledge Database to answer questions 
 
 ## Contract & Conventions
 
-- **Database Location:** The Epiphany Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **Database Location:** The Epiphany Knowledge Database defaults to a `epiphany_knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
 - **Indexes:** The database maintains two index files as entrypoints:
-  - `knowledge/indexes/topics-index.md`: A table of contents listing all the distilled subject summaries (Topics).
-  - `knowledge/indexes/sources-index.md`: A table of contents listing all the raw imported documents and URLs that have been parsed.
+  - `epiphany_knowledge/indexes/topics-index.md`: A table of contents listing all the distilled subject summaries (Topics).
+  - `epiphany_knowledge/indexes/sources-index.md`: A table of contents listing all the raw imported documents and URLs that have been parsed.
 - **Research Strategies:** Choose the best research strategy for the query:
   1. **Progressive Disclosure (Top-Down):** Start at Indexes to find Topic files, read Topics, and follow links to raw sources only if needed. Best for broad, conceptual queries.
-  2. **Text Search / Grep (Bottom-Up):** Full-text search across `knowledge/`. Best for finding specific dates, names, or undiscovered mentions.
+  2. **Text Search / Grep (Bottom-Up):** Full-text search across `epiphany_knowledge/`. Best for finding specific dates, names, or undiscovered mentions.
 - **Scanning Summaries:** When opening a parsed file, read its `**Summary:**` first. Use it as an index to decide whether to read deeper or move on.
 - **Accuracy & Hallucinations:** Accuracy is key. You MUST NOT hallucinate facts. Information should be based strictly on a raw source of truth.
-- **Citations:** Every factual claim in your answer MUST include a citation pointing to the file that provided the information, formatted as a clickable relative Markdown link (e.g., `([Source](knowledge/topics/project-alpha.md))`).
+- **Citations:** Every factual claim in your answer MUST include a citation pointing to the file that provided the information, formatted as a clickable relative Markdown link (e.g., `([Source](epiphany_knowledge/topics/project-alpha.md))`).
 - **Assumptions:** Explicitly label and justify any logical conclusions (e.g., "Assumption:" or "Logical Conclusion:").
 - **Outside Information:** If pulling information from outside resources, ask the user if it should be added to the Epiphany Knowledge Database.
 - **Interactivity:** If a query is unclear or yields no results, ask the user for clarification.
 
 ## Workflow
 
-1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
-2. **Check for Pending Knowledge:** Before querying, search the `knowledge/parsed/` directory for any files containing the text `[PENDING]`. If pending files exist, you MUST warn the user that the knowledge base is not fully distilled and ask if they would like you to run the `distilling-knowledge` skill before proceeding with the answer. You can still attempt to answer the query, but make sure the user knows the information might be incomplete.
+1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure or ask if it is located elsewhere.
+2. **Check for Pending Knowledge:** Before querying, search the `epiphany_knowledge/parsed/` directory for any files containing the text `[PENDING]`. If pending files exist, you MUST immediately stop and prompt the user, asking if they would like you to run the `distilling-knowledge` skill to update the knowledge base before you attempt to answer their query. Do not proceed with the query until the user responds.
 3. **Determine Research Path:** Choose the best combination of strategies:
    - **Use Indexes & Links:** For broad concepts, read `topics-index.md`. For specific documents, read `sources-index.md`.
-   - **Use Text Search:** For specific keywords or undiscovered leads, perform a text search across `knowledge/topics/` and/or `knowledge/parsed/`.
+   - **Use Text Search:** For specific keywords or undiscovered leads, perform a text search across `epiphany_knowledge/topics/` and/or `epiphany_knowledge/parsed/`.
 4. **Explore & Synthesize:**
    - Open the most relevant Topic files or search results.
-   - Follow relative links back to original `knowledge/parsed/` files if deeper context is needed.
-   - When exploring `knowledge/parsed/` files, read the `**Summary:**` at the top first to quickly map information.
+   - Follow relative links back to original `epiphany_knowledge/parsed/` files if deeper context is needed.
+   - When exploring `epiphany_knowledge/parsed/` files, read the `**Summary:**` at the top first to quickly map information.
    - If you cannot find the answer, or if the request is ambiguous, stop and ask the user for clarification to help narrow the search.
 5. **Validate:**
    - Ensure every factual claim has a corresponding citation.
@@ -43,12 +43,12 @@ This skill guides searching the Epiphany Knowledge Database to answer questions 
 
 ## Assistant Persona & Response Format
 
-Always format your response to the user using the following template. Ensure that all citations are clickable relative Markdown links (e.g., `([Source](knowledge/topics/project-alpha.md))`).
+Always format your response to the user using the following template. Ensure that all citations are clickable relative Markdown links (e.g., `([Source](epiphany_knowledge/topics/project-alpha.md))`).
 
 ```markdown
 **Query Results**
 
-[Provide a concise, direct answer to the user's question here. Insert your citations inline right next to factual claims like this: ([Source](knowledge/topics/project-alpha.md)).]
+[Provide a concise, direct answer to the user's question here. Insert your citations inline right next to factual claims like this: ([Source](epiphany_knowledge/topics/project-alpha.md)).]
 
 [If you made any logical leaps or assumptions, explicitly list them here with "Assumption:" or "Logical Conclusion:"]
 

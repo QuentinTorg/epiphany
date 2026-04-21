@@ -9,25 +9,25 @@ This skill guides you through ingesting external files or web URLs into the Epip
 
 ## Contract & Conventions
 
-- **Database Location:** The Epiphany Knowledge Database defaults to a `knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
-- **Raw Inputs:** Exact copies of binary documents (e.g., PDFs, DOCX) or raw HTML from URLs MUST be saved to `knowledge/raw/imports/`. If the source is already a plain-text or readable data file (e.g., `.txt`, `.md`, `.csv`, `.json`, source code), you may skip saving it to the `raw` directory and proceed directly to parsing.
-- **Parsed Text:** Extracted, readable Markdown MUST be saved to `knowledge/parsed/imports/`.
+- **Database Location:** The Epiphany Knowledge Database defaults to a `epiphany_knowledge/` directory in the current workspace root. If you cannot find the Epiphany Knowledge Database, you MUST ask the user if they want to initialize it here or if it is located elsewhere.
+- **Raw Inputs:** Exact copies of binary documents (e.g., PDFs, DOCX) or raw HTML from URLs MUST be saved to `epiphany_knowledge/raw/imports/`. If the source is already a plain-text or readable data file (e.g., `.txt`, `.md`, `.csv`, `.json`, source code), you may skip saving it to the `raw` directory and proceed directly to parsing.
+- **Parsed Text:** Extracted, readable Markdown MUST be saved to `epiphany_knowledge/parsed/imports/`.
 - **Pending State:** Parsed files MUST be marked with `[PENDING]` in their title header so the distilling agent knows they need to be processed.
-- **Index Update:** An explicit relative link to the parsed text MUST be added to `knowledge/indexes/sources-index.md`.
+- **Index Update:** An explicit relative link to the parsed text MUST be added to `epiphany_knowledge/indexes/sources-index.md`.
 
 ## Workflow
 
-1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `knowledge/` structure or ask if it is located elsewhere.
+1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure or ask if it is located elsewhere.
 2. **Fetch Raw Evidence:**
-   - **For Documents:** If the document is a binary format (e.g., PDF, DOCX), copy the original file into `knowledge/raw/imports/`. If it is already plain-text or readable data (e.g., `.md`, `.txt`, `.csv`, `.json`), you may skip this step.
-   - **For URLs:** Fetch the content of the URL and save the raw HTML or text into `knowledge/raw/imports/`.
+   - **For Documents:** If the document is a binary format (e.g., PDF, DOCX), copy the original file into `epiphany_knowledge/raw/imports/`. If it is already plain-text or readable data (e.g., `.md`, `.txt`, `.csv`, `.json`), you may skip this step.
+   - **For URLs:** Fetch the content of the URL and save the raw HTML or text into `epiphany_knowledge/raw/imports/`.
 3. **Extract Text:**
    - Use whatever tools are at your disposal to extract text from the source. For example, you might use standard utilities like `pdftotext` for PDFs, `pandoc` for documents, or even write a quick Python script if no direct tool is available.
    - If the source is extremely large, try to process it in chunks to avoid overwhelming your context.
    - Convert the extracted text into a clean Markdown format. Prefer stable, repeatable text extraction over perfect formatting reconstruction.
    - If extraction completely fails, surface the failure clearly to the user instead of pretending the source was ingested successfully.
 4. **Save Parsed Markdown:**
-   - Save the extracted Markdown into `knowledge/parsed/imports/`, using a descriptive filename based on the source (e.g., `knowledge/parsed/imports/design-doc.md`).
+   - Save the extracted Markdown into `epiphany_knowledge/parsed/imports/`, using a descriptive filename based on the source (e.g., `epiphany_knowledge/parsed/imports/design-doc.md`).
    - Add the following header at the top of the new Markdown file:
      ```markdown
      # [Source Title or Filename] [PENDING]
@@ -36,7 +36,7 @@ This skill guides you through ingesting external files or web URLs into the Epip
 
      ```
 5. **Update Sources Index:**
-   - Check if `knowledge/indexes/sources-index.md` exists. If not, create it.
+   - Check if `epiphany_knowledge/indexes/sources-index.md` exists. If not, create it.
    - Append an explicit relative Markdown link pointing to the newly parsed file, followed by a brief, single-line description of its contents.
      - Example: `- [Design Doc](../parsed/imports/design-doc.md) - Raw imported PDF containing the v2 architecture design.`
 6. **Validate:** Read back the updated `sources-index.md` and the newly created markdown file to verify they were formatted correctly and the links are valid.
@@ -44,7 +44,7 @@ This skill guides you through ingesting external files or web URLs into the Epip
 
 ## Assistant Persona & Response Format
 
-Always format your response to the user using the following template. Ensure that the file path is formatted as a clickable relative Markdown link (e.g., `[design-doc.md](knowledge/parsed/imports/design-doc.md)`).
+Always format your response to the user using the following template. Ensure that the file path is formatted as a clickable relative Markdown link (e.g., `[design-doc.md](epiphany_knowledge/parsed/imports/design-doc.md)`).
 
 ```markdown
 **Document Ingested to [[File Path]]([Relative Markdown Link])!** [Add any brief observations or notes on extraction quality here, especially if images/data were omitted]

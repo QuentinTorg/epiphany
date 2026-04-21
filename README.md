@@ -15,12 +15,12 @@ This system relies on a **Minimalist Markdown** architecture. It avoids complex 
 
 The system is built for messy real-world input. A user can capture rapid-fire notes, dump URLs, or drop in raw documents (PDFs, DOCX). The agent turns that material into a navigable knowledge base that stays useful over time.
 
-At a high level, the Epiphany Knowledge Database maintains a strict directory hierarchy (defaulting to `knowledge/` in your workspace):
+At a high level, the Epiphany Knowledge Database maintains a strict directory hierarchy (defaulting to `epiphany_knowledge/` in your workspace):
 
-- **`knowledge/raw/`**: Immutable evidence (PDFs, DOCX, HTML).
-- **`knowledge/parsed/`**: Extracted, readable Markdown awaiting distillation. Includes `notes/` for your daily chronological notes and `imports/` for converted documents/URLs.
-- **`knowledge/topics/`**: Distilled, living summaries of subjects (people, projects, systems).
-- **`knowledge/indexes/`**: Navigable tables of contents (`topics-index.md` and `sources-index.md`) that act as entry points for agent queries.
+- **`epiphany_knowledge/raw/`**: Immutable evidence (PDFs, DOCX, HTML).
+- **`epiphany_knowledge/parsed/`**: Extracted, readable Markdown awaiting distillation. Includes `notes/` for your daily chronological notes and `imports/` for converted documents/URLs.
+- **`epiphany_knowledge/topics/`**: Distilled, living summaries of subjects (people, projects, systems).
+- **`epiphany_knowledge/indexes/`**: Navigable tables of contents (`topics-index.md` and `sources-index.md`) that act as entry points for agent queries.
 
 ## The Core Skills
 
