@@ -18,7 +18,7 @@ This skill guides you through ingesting external files or web URLs into the Epip
 
 ## Workflow
 
-1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure or ask if it is located elsewhere.
+1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure or ask if it is located elsewhere. When prompting for initialization, you MUST also ask the user to provide a brief description of themselves, their role, and their core priorities so you can create the initial `epiphany_knowledge/context.md` file. You are authorized to create this file during initialization, but you may not modify it afterwards.
 2. **Fetch Raw Evidence:**
    - **For Documents:** If the document is a binary format (e.g., PDF, DOCX), copy the original file into `epiphany_knowledge/raw/imports/`. If it is already plain-text or readable data (e.g., `.md`, `.txt`, `.csv`, `.json`), you may skip this step.
    - **For URLs:** Fetch the content of the URL and save the raw HTML or text into `epiphany_knowledge/raw/imports/`.

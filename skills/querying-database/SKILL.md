@@ -1,6 +1,6 @@
 ---
 name: querying-database
-description: Queries the Epiphany Knowledge Database for information across topics, documents, and notes. Use this skill when the user asks you a direct question about past work, decisions, people, projects, tasks, or any other knowledge stored in the database.
+description: Queries the Epiphany Knowledge Database for information across topics, ingested documents, and daily notes. Use this when the user asks a direct question about past work, decisions, people, projects, or tasks. You are highly encouraged to use this proactively day-to-day while coding or problem-solving if you suspect relevant user-specific knowledge, architectural decisions, or custom documentation might be stored in the database to improve your context.
 ---
 
 # Querying the Epiphany Knowledge Database
@@ -30,7 +30,7 @@ This skill guides searching the Epiphany Knowledge Database to answer questions 
 
 ## Workflow
 
-1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure or ask if it is located elsewhere.
+1. **Locate the Database:** Check if the Epiphany Knowledge Database exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure or ask if it is located elsewhere. When prompting for initialization, you MUST also ask the user to provide a brief description of themselves, their role, and their core priorities so you can create the initial `epiphany_knowledge/context.md` file. You are authorized to create this file during initialization, but you may not modify it afterwards.
 2. **Read Global Context:** Silently read `epiphany_knowledge/context.md` (if it exists) to ground yourself in the user's terminology and identity.
 3. **Check for Pending Knowledge:** Before querying, search the `epiphany_knowledge/parsed/` directory for any files containing the text `[PENDING]`. If pending files exist, you MUST immediately stop and prompt the user, asking if they would like you to run the `distilling-knowledge` skill to update the knowledge base before you attempt to answer their query. Do not proceed with the query until the user responds.
 4. **Determine Research Path:** Choose the best combination of strategies based on the query type (e.g., check `action-items.md` for tasks, or text search for specific names).
