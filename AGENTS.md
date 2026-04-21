@@ -1,4 +1,4 @@
-This repo contains a collection of agent skills for capturing, summarizing, and querying information. Inputs can be user notes or other reference documents. Agent skill reference information can be found in [docs/skill_references](docs/skill_references).
+This repo contains a collection of agent skills for capturing, summarizing, and querying information. Inputs can be user notes or other reference documents. Agent skill reference information can be found in [docs/skill_references](docs/skill_references). All skill updates must be written following the provided in the skill references documentation. Skill references may be related to specific agents, but the skills being created are applicable for all agent types. The information in the reference docs is still applicable to all agents, even when specific agents are used as an example.
 
 When deployed, agents will only have access to the [skills](skills) directory. Skills will be loaded when the descriptions match the current situation in the agent's opinion. The agent will then read the rest of the skill and any supporting documentation the skill references when needed. The agent follows the rules/process described in the skill and performs the actions.
 
@@ -6,6 +6,4 @@ Skills should be standalone. They must fully provide context the calling agent t
 
 All information the agent needs must be contained in the skills directory and properly referenced from that file to other reference files.
 
-Any files in this repo that are not in the [skills](skills) directory or directly referenced by a skill will not be available to the agent for skills. Directories like [docs](docs) and [tests](tests) are only meant to be used for reference during development.
-
-The [docs/implementation-spec.md](docs/implementation-spec.md) exists to drive development. Unless explicitly requested, the implementation spec should not be modified to match the current implementation. It should be used as a source of truth to drive all implementation decisions. Any contraditions to the spec should be brought up and discussed with the user immediately so it can be resolved appropriately
+Any files in this repo that are not in the [skills](skills) directory or directly referenced by a skill will not be available to the agent for skills. Directories like [docs](docs) and [tests](tests) are only meant to be used for reference during development of skills, and will not be avaialable to an agent when trying to use the skills.
