@@ -1,6 +1,6 @@
 ---
 name: capturing-notes
-description: Captures user notes, fixes typos, and appends them to a chronologically ordered daily log within the Epiphany Knowledge Database. Use this skill when the user asks you to "remember" something, "capture" a note, record meeting notes, or save raw thoughts and details.
+description: Captures user notes and appends them to a daily log in the Epiphany Knowledge Database. Use this immediately when the user explicitly asks you to "remember" something, "capture" a note, or save details. You may also use this proactively to log valuable, enduring technical context (e.g., when the user explains facts about a system/environment, workflows, recurring issues, or long-standing bugs that were just resolved). DO NOT log transient session state, conversational interactions, or bugs that were created and fixed entirely within the current session.
 ---
 
 # Capturing Notes
@@ -18,7 +18,7 @@ This skill guides you through capturing user notes and appending them to a chron
 
 ## Workflow
 
-1. **Locate the Database:** Check if `epiphany_knowledge/parsed/notes/` exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure.
+1. **Locate the Database:** Check if `epiphany_knowledge/parsed/notes/` exists. If not, prompt the user for permission to initialize the `epiphany_knowledge/` structure. When prompting for initialization, you MUST also ask the user to provide a brief description of themselves, their role, and their core priorities so you can create the initial `epiphany_knowledge/context.md` file (using the standard format and Telegraphic Style). You are authorized to create this file during initialization, but you may not modify it afterwards.
 2. **Determine Time:** Determine today's date (`YYYY-MM-DD`) and the current hour (`HH:00`).
 3. **Initialize Daily Log (if needed):**
    If `epiphany_knowledge/parsed/notes/YYYY-MM-DD.md` does not exist, create it with the following template:

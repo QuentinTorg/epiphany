@@ -1,6 +1,6 @@
 ---
 name: distilling-knowledge
-description: Reads "pending" parsed notes and documents, extracts relevant facts and action items, and updates the living Topic files and Indexes. Use this skill when the user asks you to distill, summarize, organize, or review pending knowledge in the database.
+description: Extracts facts and action items from "pending" parsed notes and documents, updating the living Topic files and Indexes. Use this skill when the user explicitly asks you to distill, summarize, or organize the database. You may also proactively offer to run this skill to organize raw information after a heavy session of note capture or document ingestion.
 ---
 
 # Distilling Knowledge
@@ -16,7 +16,7 @@ This skill guides you through the process of reading freshly ingested raw materi
 - **Action Items & Open Questions:** To prevent important tasks and unresolved questions from getting lost or duplicated, do NOT embed them inside individual Topic files. Instead:
   - All Tasks/Action Items MUST be appended as checklists (`- [ ]`) in the centralized `epiphany_knowledge/indexes/action-items.md` file.
   - All unresolved Open Questions MUST be appended as checklists (`- [ ]`) in the centralized `epiphany_knowledge/indexes/open-questions.md` file.
-- **Global Context:** The `epiphany_knowledge/context.md` file acts as a lean dictionary of enduring global facts (user identity, key entities, roles, and common shorthand/acronyms). You are responsible for keeping this file updated, but you MUST NOT add project status, tasks, or transient details to it. It must be kept under 50 lines and use the following exact formatting template:
+- **Global Context:** The `epiphany_knowledge/context.md` file acts as a lean dictionary of enduring global facts (user identity, key entities, roles, common shorthand/acronyms, and key workplace tooling). You are responsible for keeping this file updated, but you MUST NOT add project status, tasks, or transient details to it. Aim to keep this file concise and high-signal so it can be loaded on every turn without wasting context tokens. You MUST use extreme information density (Telegraphic Style) when writing to this file: use sentence fragments, drop unnecessary articles/pronouns, and state facts directly. Use the following exact formatting template:
   ```markdown
   # Global Context
   
@@ -25,6 +25,9 @@ This skill guides you through the process of reading freshly ingested raw materi
   
   ## Key Entities
   - **[Entity/Person]**: [Description/Relationship]
+  
+  ## Key Tooling & Ecosystem
+  - **[Tool/System]**: [Context/URL (e.g., Jira, GitHub)]
   
   ## Glossary & Shorthand
   - **[Term]**: [Definition]
