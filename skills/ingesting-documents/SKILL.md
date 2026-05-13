@@ -31,7 +31,10 @@ This skill guides you through ingesting external files or web URLs into the Epip
         - *For PDFs:* Use `pdfimages -png <file.pdf> <output_prefix>` to extract embedded images to a temporary directory.
         - *For DOCX/PPTX:* Since these are zipped XML archives, use `unzip -j <file.docx> "word/media/*" -d <temp_dir>` or `unzip -j <file.pptx> "ppt/media/*" -d <temp_dir>` to extract the raw images.
      3. **Review & Filter:** Review the extracted images using your vision capabilities. Ignore purely decorative images (e.g., logos, backgrounds, simple icons) to save context.
-     4. **Describe Data:** For images containing important information (charts, diagrams, dense tables), write a detailed Markdown description of the visual data.
+     4. **Describe Data (Full Replacement):** For any image containing important information (e.g., charts, diagrams, dense tables, maps, visual instructions, or spatial relationships), you MUST write an exhaustive Markdown description. The text description must serve as a **full replacement** for the original image.
+        - Use the surrounding document context to gauge the image's importance and focus your description on the relevant details.
+        - For diagrams and charts containing concrete data, you must provide enough detail that the visual could be perfectly reproduced from the text alone.
+        - Ensure all vital information is preserved so future readers do not need to reference the original image.
      5. **Contextual Insertion:** Search the extracted text for context clues (e.g., "Figure 1 shows...", "As seen in the chart...") to determine where the image description belongs, and insert your text description there. If you cannot confidently determine the exact location, append a `## Extracted Diagrams & Images` section at the end of the parsed document and list the descriptions there.
    - Convert the extracted text into a clean Markdown format. 
    - If the source is extremely large, try to process it in chunks to avoid overwhelming your context.

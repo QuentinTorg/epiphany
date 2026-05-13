@@ -40,7 +40,7 @@ This skill guides you through the process of reading freshly ingested raw materi
 1. **Locate Pending Files:**
    - Search the `epiphany_knowledge/parsed/` directory (including `notes`, `imports`) for any files containing the text `[PENDING]`.
    - **Crucial Rule:** You MUST process each pending document entirely (steps 2-8) before moving on to the next. Do not try to read and distill multiple documents simultaneously.
-   - **Subagent Delegation:** When possible, it is recommended to delegate the distillation of each individual document to a subagent. This will result in the most consistent performance of distillation.
+   - **Subagent Delegation:** When possible, it is recommended to delegate the distillation of each individual document to a subagent. This keeps your main session history lean and context-efficient, and results in the most consistent performance of distillation.
 2. **Review & Extract:**
    - Read the contents of each pending file. For notes, focus ONLY on the specific entries marked with `[PENDING]`.
    - **Context Gathering:** Always read `epiphany_knowledge/context.md` first to understand the user's established terminology. If the source references external concepts, technologies, or companies that require more context to distill accurately, you are explicitly authorized to perform an internet search to fill in the gaps.
